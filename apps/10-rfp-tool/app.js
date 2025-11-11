@@ -1,4 +1,4 @@
-// Enterprise RFP Analysis Suite - DASHBOARD FIX (No infinite loops)
+// Enterprise RFP Analysis Suite - FIXED COLOR SCHEME
 
 const MOCK_RFPS = {
     'va-medical': { name: 'VA Medical Center - Phoenix', client: 'VA', sector: 'Healthcare', frameworks: ['HIPAA', 'FedRAMP'], content: `Q1.1: Describe your organization's healthcare IT experience with HIPAA compliance.\nQ1.2: Provide organizational chart for security leadership.\nQ2.1: Describe cloud infrastructure architecture.\nQ2.2: Explain network segmentation approach.\nQ2.3: How do you implement encryption?\nQ3.1: Describe NIST 800-53 control implementation.\nQ3.2: How do you achieve FedRAMP Moderate compliance?\nQ3.3: Explain IAM approach.\nQ4.1: Describe HIPAA BAA requirements and timeline.` },
@@ -73,11 +73,9 @@ class EnterpriseRFPTool {
     }
 
     renderDashboard() {
-        // ONLY render dashboard once - flag prevents re-rendering
         if (this.dashboardRendered) return;
         this.dashboardRendered = true;
 
-        // Activity Table - SIMPLE, NO CHARTS
         const tableBody = document.getElementById('activityTable');
         if (tableBody) {
             tableBody.innerHTML = this.allRFPs.slice(0, 5).map(rfp => `
@@ -91,7 +89,6 @@ class EnterpriseRFPTool {
             `).join('');
         }
 
-        // Quick Stats
         const quickStats = document.getElementById('quickStats');
         if (quickStats) {
             quickStats.innerHTML = `
@@ -102,25 +99,23 @@ class EnterpriseRFPTool {
             `;
         }
 
-        // Frameworks - NO CHARTS, JUST TEXT
         const frameworkList = document.getElementById('frameworkList');
         if (frameworkList) {
             const fw = {};
             this.allRFPs.forEach(r => r.frameworks.forEach(f => { fw[f] = (fw[f] || 0) + 1; }));
-            frameworkList.innerHTML = Object.entries(fw).map(([f, c]) => `<div style="padding: 8px; background: #f0f0f0; margin: 5px 0; border-radius: 4px;">${f}: <strong>${c}</strong></div>`).join('');
+            frameworkList.innerHTML = Object.entries(fw).map(([f, c]) => `<div style="padding: 8px; background: #f0f0f0; margin: 5px 0; border-radius: 4px; color: #333; font-weight: 500;">${f}: <strong>${c}</strong></div>`).join('');
         }
 
-        // Priority - text only
         const priorityList = document.getElementById('priorityList');
         if (priorityList) {
             priorityList.innerHTML = this.allRFPs
                 .filter(r => r.status === 'Blocked')
                 .slice(0, 3)
-                .map(r => `<div style="padding: 8px; background: #f8d7da; margin: 5px 0; border-radius: 4px;">⚠️ ${r.name}</div>`)
+                .map(r => `<div style="padding: 8px; background: #fff3cd; margin: 5px 0; border-radius: 4px; color: #333;">⚠️ ${r.name}</div>`)
                 .join('');
         }
 
-        console.log('✅ Dashboard rendered (one-time only)');
+        console.log('✅ Dashboard rendered');
     }
 
     loadSampleRFP() {
@@ -205,7 +200,7 @@ class EnterpriseRFPTool {
                 <div class="question-text">${q.text}</div>
                 <div class="question-meta">
                     <span style="background: #0052B4; color: white; padding: 2px 6px; border-radius: 2px; font-size: 10px;">${q.category}</span>
-                    <span style="background: #e0e0e0; padding: 2px 6px; border-radius: 2px; font-size: 10px;">${q.framework}</span>
+                    <span style="background: #e0e0e0; color: #333; padding: 2px 6px; border-radius: 2px; font-size: 10px;">${q.framework}</span>
                 </div>
             </div>
         `).join('');
@@ -231,24 +226,24 @@ class EnterpriseRFPTool {
         container.innerHTML = visible.map(q => {
             const resp = this.responses.get(q.id);
             return `
-            <div class="response-item" style="margin-bottom: 12px; padding: 12px; background: #f9f9f9; border-radius: 4px;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <strong style="font-size: 13px;">${q.id}: ${q.text.substring(0, 50)}...</strong>
-                    <span style="background: ${resp ? '#d4edda' : '#fff3cd'}; padding: 2px 8px; font-size: 11px; border-radius: 3px;">${resp ? 'READY' : 'PENDING'}</span>
+            <div style="margin-bottom: 12px; padding: 12px; background: white; border: 1px solid #ddd; border-radius: 4px; border-left: 4px solid #0052B4;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center;">
+                    <strong style="font-size: 13px; color: #333;">${q.id}: ${q.text.substring(0, 50)}...</strong>
+                    <span style="background: ${resp ? '#d4edda' : '#fff3cd'}; color: ${resp ? '#155724' : '#856404'}; padding: 2px 8px; font-size: 11px; border-radius: 3px; font-weight: 500;">${resp ? 'READY' : 'PENDING'}</span>
                 </div>
-                <div style="background: white; padding: 8px; border-radius: 3px; font-size: 12px; line-height: 1.4; margin-bottom: 8px; max-height: 80px; overflow-y: auto;">
-                    ${resp?.text || '<em>Not generated</em>'}
+                <div style="background: #f9f9f9; padding: 10px; border-radius: 3px; font-size: 13px; line-height: 1.5; margin-bottom: 10px; max-height: 100px; overflow-y: auto; color: #333;">
+                    ${resp?.text || '<em style="color: #999;">Not generated yet</em>'}
                 </div>
                 <div style="display: flex; gap: 8px;">
-                    <button onclick="tool.generateOneResponse('${q.id}')" style="flex: 1; padding: 6px; background: #0052B4; color: white; border: none; border-radius: 3px; font-size: 11px; cursor: pointer;">Generate</button>
-                    <button onclick="tool.copyResponse('${q.id}')" style="flex: 1; padding: 6px; background: #0052B4; color: white; border: none; border-radius: 3px; font-size: 11px; cursor: pointer;">Copy</button>
+                    <button onclick="tool.generateOneResponse('${q.id}')" style="flex: 1; padding: 8px; background: #0052B4; color: white; border: none; border-radius: 3px; font-size: 11px; cursor: pointer; font-weight: 500;">Generate</button>
+                    <button onclick="tool.copyResponse('${q.id}')" style="flex: 1; padding: 8px; background: #0052B4; color: white; border: none; border-radius: 3px; font-size: 11px; cursor: pointer; font-weight: 500;">Copy</button>
                 </div>
             </div>
             `;
         }).join('');
 
         if (this.questions.length > 15) {
-            container.innerHTML += `<div style="text-align: center; color: #999; font-size: 12px; margin-top: 15px;">Showing 15 of ${this.questions.length} responses</div>`;
+            container.innerHTML += `<div style="text-align: center; color: #666; font-size: 12px; margin-top: 15px; padding: 10px; background: #f9f9f9; border-radius: 4px;">Showing 15 of ${this.questions.length} responses</div>`;
         }
     }
 
@@ -280,9 +275,9 @@ class EnterpriseRFPTool {
         });
 
         document.getElementById('categoryBreakdown').innerHTML = Object.entries(cats)
-            .map(([c, n]) => `<div style="padding: 4px 0;">${c}: ${n}</div>`).join('');
+            .map(([c, n]) => `<div style="padding: 4px 0; color: #333;">${c}: ${n}</div>`).join('');
         document.getElementById('frameworkBreakdown').innerHTML = Object.entries(fws)
-            .map(([f, n]) => `<div style="padding: 4px 0;">${f}: ${n}</div>`).join('');
+            .map(([f, n]) => `<div style="padding: 4px 0; color: #333;">${f}: ${n}</div>`).join('');
     }
 
     exportCompletePackage() {
@@ -308,7 +303,6 @@ class EnterpriseRFPTool {
     }
 }
 
-// INIT - ONCE ONLY
 let tool = null;
 
 function switchView(view) {
