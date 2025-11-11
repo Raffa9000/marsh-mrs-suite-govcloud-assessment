@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marsh Contract Events &amp; Renewal Monitor</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-content">
+        <div class="marsh-logo">M</div>
+        <div class="header-title">
+          <h1>Marsh Contract Events &amp; Renewal Monitor</h1>
+          <div class="header-subtitle">Track Contract Milestones, Trigger Re-Evaluations</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Critical Alert Banner -->
+    <div id="alertBanner" class="alert-banner hidden">
+      <span class="alert-icon">🚨</span>
+      <span id="alertText">CRITICAL: 2 contracts renewing in 15 days. Action required.</span>
+      <button class="btn-link" onclick="filterCritical()">View Critical Events</button>
+    </div>
+
+    <!-- Main Layout -->
+    <main class="main-layout">
+      <!-- Left Pane: Calendar & Filters -->
+      <aside class="left-pane">
+        <!-- Section 1: Calendar View -->
+        <section class="calendar-section">
+          <h3>Calendar View</h3>
+          <div id="miniCalendar" class="mini-calendar"></div>
+        </section>
+
+        <!-- Section 2: Event Type Filter -->
+        <section class="filter-section">
+          <h3>Event Type Filter</h3>
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" class="event-filter" data-type="Contract Renewal" checked onchange="applyFilters()">
+              <span>Contract Renewal</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" class="event-filter" data-type="SOW Addendum" checked onchange="applyFilters()">
+              <span>SOW Addendum</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" class="event-filter" data-type="Requirement Change" checked onchange="applyFilters()">
+              <span>Requirement Change</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" class="event-filter" data-type="ATO Anniversary" checked onchange="applyFilters()">
+              <span>ATO Anniversary</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" class="event-filter" data-type="Insurance/Compliance Audit" checked onchange="applyFilters()">
+              <span>Insurance/Compliance Audit</span>
+            </label>
+          </div>
+        </section>
+
+        <!-- Section 3: Time Window Filter -->
+        <section class="filter-section">
+          <h3>Time Window Filter</h3>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="timeWindow" value="30" checked onchange="applyFilters()">
+              <span>Next 30 Days (urgent)</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="timeWindow" value="90" onchange="applyFilters()">
+              <span>Next 90 Days (planned)</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="timeWindow" value="365" onchange="applyFilters()">
+              <span>Next 12 Months (visibility)</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="timeWindow" value="all" onchange="applyFilters()">
+              <span>All Upcoming (comprehensive)</span>
+            </label>
+          </div>
+        </section>
+
+        <!-- Section 4: Alert Status -->
+        <section class="filter-section">
+          <h3>Alert Status</h3>
+          <div class="status-badges">
+            <div class="status-badge critical" onclick="filterByUrgency('CRITICAL')">
+              <span class="badge-icon">🚨</span>
+              <span class="badge-text">Critical (0-30 days): <strong id="criticalCount">2</strong> events</span>
+            </div>
+            <div class="status-badge planned" onclick="filterByUrgency('PLANNED')">
+              <span class="badge-icon">⚠</span>
+              <span class="badge-text">Planned (31-90 days): <strong id="plannedCount">2</strong> events</span>
+            </div>
+            <div class="status-badge visibility" onclick="filterByUrgency('VISIBILITY')">
+              <span class="badge-icon">ℹ</span>
+              <span class="badge-text">Visibility (91+ days): <strong id="visibilityCount">1</strong> event</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 5: Actions -->
+        <section class="filter-section">
+          <h3>Actions</h3>
+          <button class="btn btn--secondary btn--full-width" onclick="addNewEvent()">+ New Contract Event</button>
+          <button class="btn btn--secondary btn--full-width" style="margin-top: 8px;" onclick="resetFilters()">Reset Filters</button>
+          <button class="btn btn--secondary btn--full-width" style="margin-top: 8px;" onclick="downloadCalendar()">Download Calendar (ICS)</button>
+        </section>
+      </aside>
+
+      <!-- Center Pane: Timeline of Events -->
+      <div class="center-pane">
+        <h2>Contract Events Timeline</h2>
+        <div id="eventTimeline" class="event-timeline">
+          <!-- Event cards will be populated here -->
+        </div>
+        <div id="noEventsMessage" class="no-events-message hidden">
+          <p>No contract events in this window. Good news!</p>
+        </div>
+      </div>
+
+      <!-- Right Pane: Event Detail -->
+      <aside class="right-pane" id="rightPane">
+        <div id="eventDetailPanel" class="event-detail-panel hidden">
+          <!-- Event details will be populated here -->
+        </div>
+        <div id="eventDetailPlaceholder" class="detail-placeholder">
+          <p>Select an event to view details and trigger re-evaluation</p>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      &copy; Open Source | Marsh-inspired branding | Not affiliated with Marsh McLennan | Licensed MIT/Apache 2.0 | v7.0 Contract Events Monitor
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

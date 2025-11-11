@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marsh Resource Capacity &amp; Budget Planner</title>
+  <style>
+    :root {
+  /* Marsh Brand Colors */
+  --marsh-navy: #002C77;
+  --marsh-emerald: #1E865C;
+  --marsh-bg: #FFFFFF;
+  --marsh-text: #121A26;
+  --marsh-success: #1E865C;
+  --marsh-warning: #FFA500;
+  --marsh-orange: #FF9800;
+  --marsh-danger: #E03E36;
+  --marsh-amber: #FDB913;
+  
+  --color-white: rgba(255, 255, 255, 1);
+  --color-gray-200: rgba(245, 245, 245, 1);
+  --color-gray-300: rgba(167, 169, 169, 1);
+  --color-gray-400: rgba(119, 124, 124, 1);
+  --color-slate-500: rgba(98, 108, 113, 1);
+  --color-brown-600: rgba(94, 82, 64, 1);
+  --color-brown-600-rgb: 94, 82, 64;
+  
+  --color-background: var(--marsh-bg);
+  --color-surface: var(--color-white);
+  --color-text: var(--marsh-text);
+  --color-text-secondary: var(--color-slate-500);
+  --color-border: rgba(var(--color-brown-600-rgb), 0.2);
+  
+  --font-family-base: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-base: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 20px;
+  --font-size-3xl: 24px;
+  --font-size-4xl: 30px;
+  --font-size-5xl: 40px;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 550;
+  --font-weight-bold: 600;
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  
+  --space-4: 4px;
+  --space-6: 6px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-40: 40px;
+  --space-48: 48px;
+  
+  --radius-sm: 6px;
+  --radius-base: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+  
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--marsh-text);
+  background-color: var(--color-background);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  margin: 0;
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+}
+
+h1 { font-size: var(--font-size-3xl); }
+h2 { font-size: var(--font-size-2xl); }
+h3 { font-size: var(--font-size-xl); margin-bottom: var(--space-12); }
+h4 { font-size: var(--font-size-lg); }
+
+p {
+  margin: 0 0 var(--space-16) 0;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-16);
+  border-radius: var(--radius-base);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-standard);
+  border: none;
+  text-decoration: none;
+  gap: var(--space-8);
+}
+
+.btn--primary {
+  background: var(--marsh-emerald);
+  color: white;
+}
+
+.btn--primary:hover { background: #176b4a; }
+
+.btn--secondary {
+  background: rgba(var(--color-brown-600-rgb), 0.12);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.btn--secondary:hover { background: rgba(var(--color-brown-600-rgb), 0.2); }
+
+.btn--sm {
+  padding: var(--space-6) var(--space-12);
+  font-size: var(--font-size-sm);
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-header {
+  background: var(--marsh-navy);
+  color: white;
+  padding: var(--space-16) var(--space-24);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.marsh-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: white;
+  border-radius: var(--radius-sm);
+  margin-right: var(--space-12);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-2xl);
+  color: var(--marsh-navy);
+}
+
+.header-title h1 {
+  color: white;
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-4);
+}
+
+.header-subtitle {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.main-content {
+  flex: 1;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--space-40) var(--space-24);
+}
+
+/* KPI Cards Section */
+.kpi-section {
+  margin-bottom: var(--space-48);
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-24);
+}
+
+.kpi-card {
+  background: white;
+  border: 1px solid #E5E7EB;
+  border-left: 4px solid var(--marsh-emerald);
+  border-radius: var(--radius-lg);
+  padding: var(--space-24);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--duration-normal) var(--ease-standard);
+}
+
+.kpi-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.kpi-label {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-12);
+  font-weight: var(--font-weight-medium);
+}
+
+.kpi-value {
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--marsh-emerald);
+  line-height: 1;
+  margin-bottom: var(--space-8);
+}
+
+.kpi-subtext {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-12);
+}
+
+.kpi-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  padding: var(--space-4) var(--space-8);
+  border-radius: var(--radius-sm);
+}
+
+.kpi-trend.positive {
+  color: var(--marsh-emerald);
+  background: rgba(30, 134, 92, 0.1);
+}
+
+.status-indicator {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: var(--space-8);
+}
+
+.status-indicator.green { background: var(--marsh-emerald); }
+.status-indicator.yellow { background: var(--marsh-warning); }
+.status-indicator.red { background: var(--marsh-danger); }
+
+.status-distribution {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  margin-top: var(--space-12);
+}
+
+.status-bar {
+  display: flex;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.status-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: white;
+  padding: 0 var(--space-8);
+}
+
+.status-segment.migrate-now { background: var(--marsh-emerald); }
+.status-segment.migrate-soon { background: var(--marsh-amber); }
+.status-segment.migrate-later { background: var(--marsh-orange); }
+.status-segment.hold { background: var(--marsh-danger); }
+
+.status-legend {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  font-size: var(--font-size-sm);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-sm);
+}
+
+/* Executive Narrative Section */
+.narrative-section {
+  margin-bottom: var(--space-48);
+}
+
+.narrative-box {
+  background: rgba(30, 134, 92, 0.05);
+  border-left: 6px solid var(--marsh-emerald);
+  border-radius: var(--radius-lg);
+  padding: var(--space-32);
+  box-shadow: var(--shadow-sm);
+}
+
+.narrative-box h3 {
+  color: var(--marsh-emerald);
+  margin-bottom: var(--space-20);
+}
+
+.narrative-box p {
+  line-height: 1.7;
+  color: var(--color-text);
+  margin-bottom: var(--space-20);
+}
+
+/* At-Risk Section */
+.at-risk-section {
+  margin-bottom: var(--space-48);
+}
+
+.at-risk-box {
+  background: rgba(224, 62, 54, 0.05);
+  border-left: 6px solid var(--marsh-danger);
+  border-radius: var(--radius-lg);
+  padding: var(--space-24);
+  box-shadow: var(--shadow-sm);
+}
+
+.at-risk-box h3 {
+  color: var(--marsh-danger);
+  margin-bottom: var(--space-16);
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.at-risk-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-16) 0;
+}
+
+.at-risk-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-12);
+  padding: var(--space-12);
+  margin-bottom: var(--space-8);
+  background: white;
+  border-radius: var(--radius-base);
+  border: 1px solid rgba(224, 62, 54, 0.2);
+}
+
+.at-risk-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--marsh-danger);
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.at-risk-content {
+  flex: 1;
+}
+
+.at-risk-name {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  margin-bottom: var(--space-4);
+}
+
+.at-risk-reason {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.at-risk-impact {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  padding: var(--space-12);
+  background: white;
+  border-radius: var(--radius-base);
+}
+
+.success-box {
+  background: rgba(30, 134, 92, 0.1);
+  border-left: 6px solid var(--marsh-emerald);
+  border-radius: var(--radius-lg);
+  padding: var(--space-20);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  color: var(--marsh-emerald);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Timeline Section */
+.timeline-section {
+  margin-bottom: var(--space-48);
+}
+
+.timeline-container {
+  background: white;
+  border: 1px solid #E5E7EB;
+  border-radius: var(--radius-lg);
+  padding: var(--space-32);
+  box-shadow: var(--shadow-sm);
+}
+
+.timeline-track {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-32);
+  padding: 0 var(--space-16);
+}
+
+.timeline-line {
+  position: absolute;
+  top: 20px;
+  left: var(--space-16);
+  right: var(--space-16);
+  height: 4px;
+  background: #E5E7EB;
+  z-index: 0;
+}
+
+.timeline-milestone {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.timeline-marker {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--space-12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.timeline-marker.on-track {
+  background: var(--marsh-emerald);
+  color: white;
+}
+
+.timeline-marker.at-risk {
+  background: var(--marsh-warning);
+  color: white;
+}
+
+.timeline-marker.projected {
+  background: var(--color-gray-200);
+  color: var(--color-text-secondary);
+}
+
+.timeline-info {
+  text-align: center;
+}
+
+.timeline-quarter {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  margin-bottom: var(--space-4);
+}
+
+.timeline-event {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-4);
+  max-width: 150px;
+}
+
+.timeline-status {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  padding: var(--space-4) var(--space-8);
+  border-radius: var(--radius-full);
+  display: inline-block;
+}
+
+.timeline-status.on-track {
+  background: rgba(30, 134, 92, 0.1);
+  color: var(--marsh-emerald);
+}
+
+.timeline-status.at-risk {
+  background: rgba(255, 165, 0, 0.1);
+  color: var(--marsh-warning);
+}
+
+.timeline-status.projected {
+  background: rgba(119, 124, 124, 0.1);
+  color: var(--color-text-secondary);
+}
+
+/* Key Metrics Grid */
+.metrics-section {
+  margin-bottom: var(--space-48);
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-20);
+}
+
+.metric-card {
+  background: white;
+  border: 1px solid #E5E7EB;
+  border-radius: var(--radius-lg);
+  padding: var(--space-20);
+  box-shadow: var(--shadow-sm);
+}
+
+.metric-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-8);
+  font-weight: var(--font-weight-medium);
+}
+
+.metric-value {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--marsh-emerald);
+  line-height: 1;
+  margin-bottom: var(--space-8);
+}
+
+.metric-value.danger {
+  color: var(--marsh-danger);
+}
+
+.metric-trend {
+  font-size: var(--font-size-sm);
+  color: var(--marsh-emerald);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.metric-note {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-style: italic;
+  margin-top: var(--space-4);
+}
+
+/* Actions Section */
+.actions-section {
+  margin-bottom: var(--space-48);
+}
+
+.actions-box {
+  background: white;
+  border: 2px solid var(--marsh-emerald);
+  border-radius: var(--radius-lg);
+  padding: var(--space-32);
+  box-shadow: var(--shadow-sm);
+}
+
+.actions-box h3 {
+  color: var(--marsh-emerald);
+  margin-bottom: var(--space-20);
+}
+
+.actions-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.action-item {
+  padding: var(--space-16);
+  margin-bottom: var(--space-12);
+  background: rgba(30, 134, 92, 0.03);
+  border-left: 3px solid var(--marsh-emerald);
+  border-radius: var(--radius-base);
+}
+
+.action-number {
+  font-weight: var(--font-weight-bold);
+  color: var(--marsh-emerald);
+  margin-right: var(--space-8);
+}
+
+.action-title {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  margin-bottom: var(--space-8);
+}
+
+.action-meta {
+  display: flex;
+  gap: var(--space-16);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-8);
+}
+
+/* Talking Points Section */
+.talking-points-section {
+  margin-bottom: var(--space-48);
+}
+
+.talking-points-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: var(--space-16);
+  background: var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-16);
+}
+
+.talking-points-header:hover {
+  background: #E5E7EB;
+}
+
+.talking-points-content {
+  display: none;
+  background: white;
+  border: 1px solid #E5E7EB;
+  border-radius: var(--radius-lg);
+  padding: var(--space-24);
+  box-shadow: var(--shadow-sm);
+}
+
+.talking-points-content.expanded {
+  display: block;
+}
+
+.talking-point {
+  padding: var(--space-16);
+  margin-bottom: var(--space-12);
+  background: rgba(30, 134, 92, 0.03);
+  border-radius: var(--radius-base);
+  position: relative;
+}
+
+.talking-point-text {
+  line-height: 1.6;
+  color: var(--color-text);
+  padding-right: var(--space-40);
+}
+
+.copy-btn {
+  position: absolute;
+  top: var(--space-12);
+  right: var(--space-12);
+  padding: var(--space-4) var(--space-8);
+  font-size: var(--font-size-xs);
+  background: var(--marsh-emerald);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.copy-btn:hover {
+  background: #176b4a;
+}
+
+/* Footer Actions */
+.footer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+  padding: var(--space-24);
+  background: var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-48);
+}
+
+.footer-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  padding: var(--space-16) 0;
+}
+
+.app-footer {
+  text-align: center;
+  padding: var(--space-24);
+  font-size: var(--font-size-sm);
+  color: #666;
+  background: white;
+  border-top: 1px solid #DDD;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .timeline-track {
+    flex-direction: column;
+    gap: var(--space-24);
+  }
+  
+  .timeline-line {
+    display: none;
+  }
+  
+  .timeline-event {
+    max-width: none;
+  }
+  
+  .footer-actions {
+    flex-direction: column;
+  }
+  
+  .footer-actions .btn {
+    width: 100%;
+  }
+}
+
+@media print {
+  .app-header,
+  .app-footer,
+  .footer-actions,
+  .copy-btn {
+    display: none;
+  }
+  
+  .main-content {
+    max-width: 100%;
+    padding: 0;
+  }
+  
+  .narrative-box,
+  .at-risk-box,
+  .actions-box,
+  .timeline-container {
+    break-inside: avoid;
+  }
+}
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-content">
+        <div class="header-left">
+          <div class="marsh-logo">M</div>
+          <div class="header-title">
+            <h1>Marsh Risk &amp; Readiness Heat Map</h1>
+            <div class="header-subtitle">Strategic Portfolio Positioning &amp; Workstream Allocation</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-layout">
+      <!-- Left Sidebar: Filters -->
+      <aside class="left-pane">
+        <div class="input-panel">
+          <h2>Filters &amp; Legend</h2>
+          
+          <!-- Section 1: View Mode -->
+          <section class="input-section">
+            <h3>View Mode</h3>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="viewMode" value="risk-impact" checked onchange="changeViewMode()">
+                <span>Risk/Impact Quadrant</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="viewMode" value="risk-readiness" onchange="changeViewMode()">
+                <span>Risk/Readiness Scatter</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="viewMode" value="value-compliance" onchange="changeViewMode()">
+                <span>Business Value vs Compliance</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="viewMode" value="timeline-effort" onchange="changeViewMode()">
+                <span>Timeline vs Effort</span>
+              </label>
+            </div>
+          </section>
+          
+          <!-- Section 2: Classification Filter -->
+          <section class="input-section">
+            <h3>Classification Filter</h3>
+            <div class="checkbox-group">
+              <label class="checkbox-label">
+                <input type="checkbox" checked onchange="filterRFPs()">
+                <span><span class="legend-dot" style="background: #1E865C;"></span> Migrate Now</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" checked onchange="filterRFPs()">
+                <span><span class="legend-dot" style="background: #FFA500;"></span> Migrate Soon</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" checked onchange="filterRFPs()">
+                <span><span class="legend-dot" style="background: #FF9800;"></span> Migrate Later</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" checked onchange="filterRFPs()">
+                <span><span class="legend-dot" style="background: #E03E36;"></span> Hold</span>
+              </label>
+            </div>
+          </section>
+          
+          <!-- Section 3: Sector Filter -->
+          <section class="input-section">
+            <h3>Sector Filter</h3>
+            <div class="checkbox-group">
+              <label class="checkbox-label">
+                <input type="checkbox" checked onchange="filterRFPs()">
+                <span>Federal</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" checked onchange="filterRFPs()">
+                <span>State</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" checked onchange="filterRFPs()">
+                <span>Healthcare</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" checked onchange="filterRFPs()">
+                <span>Defense</span>
+              </label>
+            </div>
+          </section>
+          
+          <!-- Section 4: Size By -->
+          <section class="input-section">
+            <h3>Size By</h3>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="sizeBy" value="mrs" checked onchange="updateVisualization()">
+                <span>MRS Score</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="sizeBy" value="business-value" onchange="updateVisualization()">
+                <span>Business Value</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="sizeBy" value="effort" onchange="updateVisualization()">
+                <span>Team Effort Required</span>
+              </label>
+            </div>
+          </section>
+          
+          <!-- Section 5: Workstreams -->
+          <section class="input-section">
+            <h3>Workstreams</h3>
+            <select class="form-control" onchange="filterByWorkstream(this.value)">
+              <option value="all">All Workstreams</option>
+              <option value="team-a">Team A — Security Focus</option>
+              <option value="team-b">Team B — Compliance</option>
+              <option value="team-c">Team C — Infrastructure</option>
+              <option value="unassigned">Unassigned</option>
+            </select>
+          </section>
+          
+          <!-- Section 6: Quadrant Insights -->
+          <section class="input-section">
+            <h3>Quadrant Insights</h3>
+            <div class="quadrant-summary">
+              <div class="insight-item"><strong>Quick Wins (2):</strong> VA Medical Center, DOD Logistics</div>
+              <div class="insight-item"><strong>Strategic Priority (4):</strong> Federal Student Aid, State DMV, VA Benefits, Defense Intel</div>
+              <div class="insight-item"><strong>Low Priority (1):</strong> Municipal Water District</div>
+              <div class="insight-item"><strong>Problem Child (3):</strong> County Health, State Tax, State Unemployment</div>
+            </div>
+          </section>
+          
+          <div class="input-actions">
+            <button class="btn btn--secondary btn--full-width" onclick="resetFilters()">Reset Filters</button>
+          </div>
+        </div>
+      </aside>
+      
+      <!-- Center Pane: Quadrant Visualization -->
+      <div class="center-pane">
+        <div class="quadrant-container" id="quadrantContainer">
+          <canvas id="quadrantCanvas"></canvas>
+        </div>
+        <div class="export-bar">
+          <button class="btn btn--primary btn--sm" onclick="exportQuadrantPNG()">📄 Export Quadrant (PNG)</button>
+          <button class="btn btn--primary btn--sm" onclick="exportWorkstreamCSV()">📄 Export Workstream Assignments (CSV)</button>
+          <button class="btn btn--secondary btn--sm" onclick="exportStrategicPlanPDF()">📃 Export Strategic Plan (PDF)</button>
+          <button class="btn btn--secondary btn--sm" onclick="generateExecutiveBrief()">📋 Generate Executive Brief</button>
+        </div>
+      </div>
+      
+      <!-- Right Sidebar: RFP Detail -->
+      <aside class="right-sidebar" id="rightSidebar" style="display: none;">
+        <div class="sidebar-header">
+          <h3 id="sidebarTitle">Select an RFP</h3>
+          <button class="close-btn" onclick="closeSidebar()">&times;</button>
+        </div>
+        <div class="sidebar-content" id="sidebarContent">
+          <p style="color: #626C7C; font-size: 14px;">Click on any bubble in the quadrant to view details and assign workstreams.</p>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      &copy; Open Source | Marsh-inspired branding | Not affiliated with Marsh McLennan | Licensed MIT/Apache 2.0 | v6.0 Risk Heat Map
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+        <section class="kpi-section">
+          <div class="kpi-grid">
+            <!-- Card 1: Quarterly Capacity -->
+            <div class="kpi-card kpi-card--purple">
+              <div class="kpi-label">Quarterly Capacity</div>
+              <div class="kpi-value" id="quarterlyCapacity">3.2</div>
+              <div class="kpi-subtext" id="capacitySubtext">RFPs/quarter at current staffing</div>
+              <div style="font-size: 12px; color: #626C7C; margin-top: 8px;" id="capacityBreakdown">2 Security, 2 Compliance, 1 Infra</div>
+            </div>
+
+            <!-- Card 2: Portfolio Completion -->
+            <div class="kpi-card kpi-card--purple">
+              <div class="kpi-label">Portfolio Completion</div>
+              <div class="kpi-value" id="completionDate" style="font-size: 2rem;">Q2 2026</div>
+              <div class="kpi-subtext">Estimated portfolio completion date</div>
+              <div style="font-size: 12px; color: #626C7C; margin-top: 8px;">Variance: ±1 quarter</div>
+            </div>
+
+            <!-- Card 3: Required Budget -->
+            <div class="kpi-card kpi-card--purple">
+              <div class="kpi-label">Required Budget</div>
+              <div class="kpi-value" id="requiredBudget">$486K</div>
+              <div class="kpi-subtext" id="budgetStatus">vs $500K available (✓ Within budget)</div>
+            </div>
+            
+            <!-- Card 4: Bottleneck -->
+            <div class="kpi-card kpi-card--warning">
+              <div class="kpi-label">Bottleneck</div>
+              <div class="kpi-value" id="bottleneck" style="font-size: 2rem; color: #E03E36;">Security</div>
+              <div class="kpi-subtext" id="bottleneckImpact">Your constraint. Unlocking this would reduce timeline by 3 months</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 2: Capacity Burn-Down Chart -->
+        <section class="chart-section">
+          <h3>Portfolio Migration Timeline</h3>
+          <div class="chart-container">
+            <canvas id="burndownChart"></canvas>
+          </div>
+          <div class="chart-note" id="chartNote">
+            At current staffing (6 FTEs), you'll complete 75% by end of planning horizon.
+          </div>
+        </section>
+
+        <!-- Section 3: Resource Utilization Grid -->
+        <section class="resource-section">
+          <h3>Monthly Resource Allocation</h3>
+          <div class="table-container">
+            <table class="utilization-table" id="utilizationTable">
+              <thead>
+                <tr>
+                  <th>Month</th>
+                  <th>Security (hrs)</th>
+                  <th>Compliance (hrs)</th>
+                  <th>Infra (hrs)</th>
+                  <th>PM (hrs)</th>
+                  <th>Total (hrs)</th>
+                  <th>% Utilized</th>
+                </tr>
+              </thead>
+              <tbody id="utilizationBody">
+              </tbody>
+            </table>
+          </div>
+        </section>
+        
+        <!-- Section 4: What-If Scenarios -->
+        <section class="scenario-section">
+          <h3>What-If Scenarios</h3>
+          
+          <div class="scenario-accordion">
+            <div class="scenario-item">
+              <div class="scenario-header" onclick="toggleScenario(1)">
+                <span class="scenario-title">Scenario 1: Add 1 Security Engineer</span>
+                <span class="scenario-arrow" id="arrow1">▼</span>
+              </div>
+              <div class="scenario-content" id="scenario1">
+                <div class="scenario-impact">
+                  <p><strong>Timeline:</strong> Reduced by 8 weeks</p>
+                  <p><strong>Budget:</strong> Increases by $120K</p>
+                  <p><strong>New Completion:</strong> Q1 2026</p>
+                  <p><strong>Bottleneck:</strong> Shifts to Infrastructure</p>
+                </div>
+                <button class="btn btn--primary btn--sm" onclick="applyScenario(1)">Apply This Scenario</button>
+              </div>
+            </div>
+            
+            <div class="scenario-item">
+              <div class="scenario-header" onclick="toggleScenario(2)">
+                <span class="scenario-title">Scenario 2: Increase Budget by 20%</span>
+                <span class="scenario-arrow" id="arrow2">▼</span>
+              </div>
+              <div class="scenario-content" id="scenario2">
+                <div class="scenario-impact">
+                  <p><strong>Timeline:</strong> Reduced by 4 weeks</p>
+                  <p><strong>Budget:</strong> $600K total (+$100K)</p>
+                  <p><strong>Impact:</strong> Can hire 1 contractor FTE</p>
+                  <p><strong>New Completion:</strong> Q1 2026</p>
+                </div>
+                <button class="btn btn--primary btn--sm" onclick="applyScenario(2)">Apply This Scenario</button>
+              </div>
+            </div>
+            
+            <div class="scenario-item">
+              <div class="scenario-header" onclick="toggleScenario(3)">
+                <span class="scenario-title">Scenario 3: Accelerate High-Priority RFPs Only</span>
+                <span class="scenario-arrow" id="arrow3">▼</span>
+              </div>
+              <div class="scenario-content" id="scenario3">
+                <div class="scenario-impact">
+                  <p><strong>Approach:</strong> Skip Hold tier, focus on Now/Soon</p>
+                  <p><strong>Core Portfolio:</strong> Complete by Q4 2025</p>
+                  <p><strong>Deferred RFPs:</strong> 1 RFP needs 16 weeks later</p>
+                  <p><strong>Budget Impact:</strong> -$150K (deferred work)</p>
+                </div>
+                <button class="btn btn--primary btn--sm" onclick="applyScenario(3)">Apply This Scenario</button>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Section 5: Bottleneck Analysis -->
+        <section class="bottleneck-section">
+          <div class="alert-box alert-box--warning">
+            <h3>Capacity Constraints &amp; Recommendations</h3>
+            <div class="bottleneck-detail">
+              <div class="bottleneck-current">
+                <strong>Current Bottleneck:</strong> <span id="bottleneckName">Security Engineering</span>
+              </div>
+              <div class="bottleneck-reason" id="bottleneckReason">
+                <strong>Reason:</strong> 2 Security Engineers can only complete 3.2 RFPs/quarter. You have 5 in Migrate Soon tier requiring security work.
+              </div>
+              <div class="bottleneck-impact-detail" id="bottleneckImpactDetail">
+                <strong>Impact:</strong> Portfolio timeline extended by 3 months without additional headcount.
+              </div>
+              <div class="bottleneck-recommendation" id="bottleneckRecommendation">
+                <strong>Recommendation:</strong> Hire 1 contractor Security Engineer for 6 months (cost: ~$120K). This reduces timeline by 8 weeks and moves completion to Q1 2026.
+              </div>
+              <div class="bottleneck-alternatives">
+                <strong>Alternatives:</strong>
+                <ul>
+                  <li>Defer 2 'Migrate Later' RFPs to free 2 weeks of capacity</li>
+                  <li>Outsource compliance review ($60K) to shift internal resources</li>
+                  <li>Prioritize 'Migrate Now' tier only, defer 'Soon' tier to next cycle</li>
+                </ul>
+              </div>
+            </div>
+            <div class="bottleneck-actions">
+              <button class="btn btn--primary btn--sm" onclick="hireContractor()">Hire Contractor</button>
+              <button class="btn btn--secondary btn--sm" onclick="deferMigrations()">Defer Migrations</button>
+              <button class="btn btn--secondary btn--sm" onclick="outsourceFunction()">Outsource Function</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 6: RFP-by-RFP Effort Breakdown -->
+        <section class="effort-section">
+          <h3>RFP-by-RFP Resource Estimate</h3>
+          <div class="table-container">
+            <table class="results-table" id="effortTable">
+              <thead>
+                <tr>
+                  <th onclick="sortTable(0)">RFP</th>
+                  <th onclick="sortTable(1)">Classification</th>
+                  <th onclick="sortTable(2)">Security (hrs)</th>
+                  <th onclick="sortTable(3)">Compliance (hrs)</th>
+                  <th onclick="sortTable(4)">Infra (hrs)</th>
+                  <th onclick="sortTable(5)">PM (hrs)</th>
+                  <th onclick="sortTable(6)">Total</th>
+                  <th onclick="sortTable(7)">Timeline</th>
+                  <th onclick="sortTable(8)">Cost</th>
+                </tr>
+              </thead>
+              <tbody id="effortBody">
+              </tbody>
+              <tfoot>
+                <tr class="table-footer">
+                  <td colspan="6"><strong>Total</strong></td>
+                  <td><strong id="totalHours">0</strong></td>
+                  <td><strong id="totalWeeks">0</strong> wks</td>
+                  <td><strong id="totalCost">$0</strong></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </section>
+
+        <!-- Section 7: Staffing Plan -->
+        <section class="staffing-section">
+          <h3>Recommended Staffing Model</h3>
+          <div class="staffing-comparison">
+            <div class="staffing-summary">
+              <div><strong>Current:</strong> <span id="currentFTEs">6</span> FTEs</div>
+              <div><strong>Recommended:</strong> <span id="recommendedFTEs">8</span> FTEs</div>
+            </div>
+          </div>
+          <div class="table-container">
+            <table class="results-table">
+              <thead>
+                <tr>
+                  <th>Role</th>
+                  <th>Current</th>
+                  <th>Recommended</th>
+                  <th>Hire By</th>
+                  <th>Incremental Cost</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Security Engineer</td>
+                  <td>2</td>
+                  <td>3</td>
+                  <td>Nov 2025</td>
+                  <td>+$180K/yr</td>
+                </tr>
+                <tr>
+                  <td>Compliance Analyst</td>
+                  <td>2</td>
+                  <td>2</td>
+                  <td>No change</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td>Infrastructure Engineer</td>
+                  <td>1</td>
+                  <td>2</td>
+                  <td>Dec 2025</td>
+                  <td>+$160K/yr</td>
+                </tr>
+                <tr>
+                  <td>Project Manager</td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>No change</td>
+                  <td>—</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr class="table-footer">
+                  <td><strong>Total</strong></td>
+                  <td><strong>6</strong></td>
+                  <td><strong>8</strong></td>
+                  <td></td>
+                  <td><strong>+$340K</strong></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <div class="staffing-impact">
+            <strong>Impact:</strong> Recommended staffing reduces portfolio timeline from 18 months to 12 months, completing by Q1 2026.
+          </div>
+        </section>
+
+        <!-- Section 8: Budget Breakdown -->
+        <section class="budget-section">
+          <h3>Estimated Budget Allocation</h3>
+          <div class="budget-chart-container">
+            <canvas id="budgetChart"></canvas>
+          </div>
+          <div class="budget-summary" id="budgetSummary">
+            <div><strong>Total Required:</strong> $486K</div>
+            <div><strong>Available:</strong> $500K</div>
+            <div class="budget-status-ok"><strong>Status:</strong> ✓ Within budget</div>
+          </div>
+        </section>
+        
+        <!-- Section 9: Monthly Cash Flow -->
+        <section class="cashflow-section">
+          <h3>Projected Monthly Spend</h3>
+          <div class="chart-container">
+            <canvas id="cashflowChart"></canvas>
+          </div>
+        </section>
+        
+        <!-- Section 10: Export Actions -->
+        <section class="export-section">
+          <div class="export-actions">
+            <button class="btn btn--primary" onclick="exportStaffingPlan()">📄 Export Staffing Plan (PDF)</button>
+            <button class="btn btn--primary" onclick="exportBudgetForecast()">📄 Export Budget Forecast (Excel)</button>
+            <button class="btn btn--secondary" onclick="exportTimeline()">📊 Export Timeline (CSV)</button>
+            <button class="btn btn--secondary" onclick="generateExecutiveSummary()">📃 Generate Executive Summary</button>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      © Open Source | Marsh-inspired branding | Not affiliated with Marsh McLennan | Licensed MIT/Apache 2.0 | v5.0
+    </footer>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

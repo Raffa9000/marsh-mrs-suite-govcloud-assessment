@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marsh Portfolio Steering Dashboard</title>
+  <style>
+    :root {
+  /* Marsh Brand Colors */
+  --marsh-navy: #002C77;
+  --marsh-emerald: #1E865C;
+  --marsh-bg: #FFFFFF;
+  --marsh-text: #121A26;
+  --marsh-success: #1E865C;
+  --marsh-warning: #FFA500;
+  --marsh-orange: #FF9800;
+  --marsh-danger: #E03E36;
+  --marsh-amber: #FDB913;
+  
+  --color-white: rgba(255, 255, 255, 1);
+  --color-gray-200: rgba(245, 245, 245, 1);
+  --color-gray-300: rgba(167, 169, 169, 1);
+  --color-gray-400: rgba(119, 124, 124, 1);
+  --color-slate-500: rgba(98, 108, 113, 1);
+  --color-brown-600: rgba(94, 82, 64, 1);
+  --color-brown-600-rgb: 94, 82, 64;
+  
+  --color-background: var(--marsh-bg);
+  --color-surface: var(--color-white);
+  --color-text: var(--marsh-text);
+  --color-text-secondary: var(--color-slate-500);
+  --color-border: rgba(var(--color-brown-600-rgb), 0.2);
+  
+  --font-family-base: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-base: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 20px;
+  --font-size-3xl: 24px;
+  --font-size-4xl: 30px;
+  --font-size-5xl: 40px;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 550;
+  --font-weight-bold: 600;
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  
+  --space-4: 4px;
+  --space-6: 6px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-40: 40px;
+  --space-48: 48px;
+  
+  --radius-sm: 6px;
+  --radius-base: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+  
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--marsh-text);
+  background-color: var(--color-background);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  margin: 0;
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+}
+
+h1 { font-size: var(--font-size-3xl); }
+h2 { font-size: var(--font-size-2xl); }
+h3 { font-size: var(--font-size-xl); margin-bottom: var(--space-12); }
+h4 { font-size: var(--font-size-lg); }
+
+p {
+  margin: 0 0 var(--space-16) 0;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-16);
+  border-radius: var(--radius-base);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-standard);
+  border: none;
+  text-decoration: none;
+  gap: var(--space-8);
+}
+
+.btn--primary {
+  background: var(--marsh-emerald);
+  color: white;
+}
+
+.btn--primary:hover { background: #176b4a; }
+
+.btn--secondary {
+  background: rgba(var(--color-brown-600-rgb), 0.12);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.btn--secondary:hover { background: rgba(var(--color-brown-600-rgb), 0.2); }
+
+.btn--sm {
+  padding: var(--space-6) var(--space-12);
+  font-size: var(--font-size-sm);
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-header {
+  background: var(--marsh-navy);
+  color: white;
+  padding: var(--space-16) var(--space-24);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.marsh-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: white;
+  border-radius: var(--radius-sm);
+  margin-right: var(--space-12);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-2xl);
+  color: var(--marsh-navy);
+}
+
+.header-title h1 {
+  color: white;
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-4);
+}
+
+.header-subtitle {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.main-content {
+  flex: 1;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--space-40) var(--space-24);
+}
+
+/* KPI Cards Section */
+.kpi-section {
+  margin-bottom: var(--space-48);
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-24);
+}
+
+.kpi-card {
+  background: white;
+  border: 1px solid #E5E7EB;
+  border-left: 4px solid var(--marsh-emerald);
+  border-radius: var(--radius-lg);
+  padding: var(--space-24);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--duration-normal) var(--ease-standard);
+}
+
+.kpi-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.kpi-label {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-12);
+  font-weight: var(--font-weight-medium);
+}
+
+.kpi-value {
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--marsh-emerald);
+  line-height: 1;
+  margin-bottom: var(--space-8);
+}
+
+.kpi-subtext {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-12);
+}
+
+.kpi-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  padding: var(--space-4) var(--space-8);
+  border-radius: var(--radius-sm);
+}
+
+.kpi-trend.positive {
+  color: var(--marsh-emerald);
+  background: rgba(30, 134, 92, 0.1);
+}
+
+.status-indicator {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: var(--space-8);
+}
+
+.status-indicator.green { background: var(--marsh-emerald); }
+.status-indicator.yellow { background: var(--marsh-warning); }
+.status-indicator.red { background: var(--marsh-danger); }
+
+.status-distribution {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  margin-top: var(--space-12);
+}
+
+.status-bar {
+  display: flex;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.status-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: white;
+  padding: 0 var(--space-8);
+}
+
+.status-segment.migrate-now { background: var(--marsh-emerald); }
+.status-segment.migrate-soon { background: var(--marsh-amber); }
+.status-segment.migrate-later { background: var(--marsh-orange); }
+.status-segment.hold { background: var(--marsh-danger); }
+
+.status-legend {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  font-size: var(--font-size-sm);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-sm);
+}
+
+/* Executive Narrative Section */
+.narrative-section {
+  margin-bottom: var(--space-48);
+}
+
+.narrative-box {
+  background: rgba(30, 134, 92, 0.05);
+  border-left: 6px solid var(--marsh-emerald);
+  border-radius: var(--radius-lg);
+  padding: var(--space-32);
+  box-shadow: var(--shadow-sm);
+}
+
+.narrative-box h3 {
+  color: var(--marsh-emerald);
+  margin-bottom: var(--space-20);
+}
+
+.narrative-box p {
+  line-height: 1.7;
+  color: var(--color-text);
+  margin-bottom: var(--space-20);
+}
+
+/* At-Risk Section */
+.at-risk-section {
+  margin-bottom: var(--space-48);
+}
+
+.at-risk-box {
+  background: rgba(224, 62, 54, 0.05);
+  border-left: 6px solid var(--marsh-danger);
+  border-radius: var(--radius-lg);
+  padding: var(--space-24);
+  box-shadow: var(--shadow-sm);
+}
+
+.at-risk-box h3 {
+  color: var(--marsh-danger);
+  margin-bottom: var(--space-16);
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.at-risk-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-16) 0;
+}
+
+.at-risk-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-12);
+  padding: var(--space-12);
+  margin-bottom: var(--space-8);
+  background: white;
+  border-radius: var(--radius-base);
+  border: 1px solid rgba(224, 62, 54, 0.2);
+}
+
+.at-risk-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--marsh-danger);
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.at-risk-content {
+  flex: 1;
+}
+
+.at-risk-name {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  margin-bottom: var(--space-4);
+}
+
+.at-risk-reason {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.at-risk-impact {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  padding: var(--space-12);
+  background: white;
+  border-radius: var(--radius-base);
+}
+
+.success-box {
+  background: rgba(30, 134, 92, 0.1);
+  border-left: 6px solid var(--marsh-emerald);
+  border-radius: var(--radius-lg);
+  padding: var(--space-20);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  color: var(--marsh-emerald);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Timeline Section */
+.timeline-section {
+  margin-bottom: var(--space-48);
+}
+
+.timeline-container {
+  background: white;
+  border: 1px solid #E5E7EB;
+  border-radius: var(--radius-lg);
+  padding: var(--space-32);
+  box-shadow: var(--shadow-sm);
+}
+
+.timeline-track {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-32);
+  padding: 0 var(--space-16);
+}
+
+.timeline-line {
+  position: absolute;
+  top: 20px;
+  left: var(--space-16);
+  right: var(--space-16);
+  height: 4px;
+  background: #E5E7EB;
+  z-index: 0;
+}
+
+.timeline-milestone {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.timeline-marker {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--space-12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.timeline-marker.on-track {
+  background: var(--marsh-emerald);
+  color: white;
+}
+
+.timeline-marker.at-risk {
+  background: var(--marsh-warning);
+  color: white;
+}
+
+.timeline-marker.projected {
+  background: var(--color-gray-200);
+  color: var(--color-text-secondary);
+}
+
+.timeline-info {
+  text-align: center;
+}
+
+.timeline-quarter {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  margin-bottom: var(--space-4);
+}
+
+.timeline-event {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-4);
+  max-width: 150px;
+}
+
+.timeline-status {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  padding: var(--space-4) var(--space-8);
+  border-radius: var(--radius-full);
+  display: inline-block;
+}
+
+.timeline-status.on-track {
+  background: rgba(30, 134, 92, 0.1);
+  color: var(--marsh-emerald);
+}
+
+.timeline-status.at-risk {
+  background: rgba(255, 165, 0, 0.1);
+  color: var(--marsh-warning);
+}
+
+.timeline-status.projected {
+  background: rgba(119, 124, 124, 0.1);
+  color: var(--color-text-secondary);
+}
+
+/* Key Metrics Grid */
+.metrics-section {
+  margin-bottom: var(--space-48);
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-20);
+}
+
+.metric-card {
+  background: white;
+  border: 1px solid #E5E7EB;
+  border-radius: var(--radius-lg);
+  padding: var(--space-20);
+  box-shadow: var(--shadow-sm);
+}
+
+.metric-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-8);
+  font-weight: var(--font-weight-medium);
+}
+
+.metric-value {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--marsh-emerald);
+  line-height: 1;
+  margin-bottom: var(--space-8);
+}
+
+.metric-value.danger {
+  color: var(--marsh-danger);
+}
+
+.metric-trend {
+  font-size: var(--font-size-sm);
+  color: var(--marsh-emerald);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.metric-note {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-style: italic;
+  margin-top: var(--space-4);
+}
+
+/* Actions Section */
+.actions-section {
+  margin-bottom: var(--space-48);
+}
+
+.actions-box {
+  background: white;
+  border: 2px solid var(--marsh-emerald);
+  border-radius: var(--radius-lg);
+  padding: var(--space-32);
+  box-shadow: var(--shadow-sm);
+}
+
+.actions-box h3 {
+  color: var(--marsh-emerald);
+  margin-bottom: var(--space-20);
+}
+
+.actions-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.action-item {
+  padding: var(--space-16);
+  margin-bottom: var(--space-12);
+  background: rgba(30, 134, 92, 0.03);
+  border-left: 3px solid var(--marsh-emerald);
+  border-radius: var(--radius-base);
+}
+
+.action-number {
+  font-weight: var(--font-weight-bold);
+  color: var(--marsh-emerald);
+  margin-right: var(--space-8);
+}
+
+.action-title {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  margin-bottom: var(--space-8);
+}
+
+.action-meta {
+  display: flex;
+  gap: var(--space-16);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-8);
+}
+
+/* Talking Points Section */
+.talking-points-section {
+  margin-bottom: var(--space-48);
+}
+
+.talking-points-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: var(--space-16);
+  background: var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-16);
+}
+
+.talking-points-header:hover {
+  background: #E5E7EB;
+}
+
+.talking-points-content {
+  display: none;
+  background: white;
+  border: 1px solid #E5E7EB;
+  border-radius: var(--radius-lg);
+  padding: var(--space-24);
+  box-shadow: var(--shadow-sm);
+}
+
+.talking-points-content.expanded {
+  display: block;
+}
+
+.talking-point {
+  padding: var(--space-16);
+  margin-bottom: var(--space-12);
+  background: rgba(30, 134, 92, 0.03);
+  border-radius: var(--radius-base);
+  position: relative;
+}
+
+.talking-point-text {
+  line-height: 1.6;
+  color: var(--color-text);
+  padding-right: var(--space-40);
+}
+
+.copy-btn {
+  position: absolute;
+  top: var(--space-12);
+  right: var(--space-12);
+  padding: var(--space-4) var(--space-8);
+  font-size: var(--font-size-xs);
+  background: var(--marsh-emerald);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.copy-btn:hover {
+  background: #176b4a;
+}
+
+/* Footer Actions */
+.footer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+  padding: var(--space-24);
+  background: var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-48);
+}
+
+.footer-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  padding: var(--space-16) 0;
+}
+
+.app-footer {
+  text-align: center;
+  padding: var(--space-24);
+  font-size: var(--font-size-sm);
+  color: #666;
+  background: white;
+  border-top: 1px solid #DDD;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .timeline-track {
+    flex-direction: column;
+    gap: var(--space-24);
+  }
+  
+  .timeline-line {
+    display: none;
+  }
+  
+  .timeline-event {
+    max-width: none;
+  }
+  
+  .footer-actions {
+    flex-direction: column;
+  }
+  
+  .footer-actions .btn {
+    width: 100%;
+  }
+}
+
+@media print {
+  .app-header,
+  .app-footer,
+  .footer-actions,
+  .copy-btn {
+    display: none;
+  }
+  
+  .main-content {
+    max-width: 100%;
+    padding: 0;
+  }
+  
+  .narrative-box,
+  .at-risk-box,
+  .actions-box,
+  .timeline-container {
+    break-inside: avoid;
+  }
+}
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-content">
+        <div class="header-left">
+          <div class="marsh-logo">M</div>
+          <div class="header-title">
+            <h1>Marsh Portfolio Steering Dashboard</h1>
+            <div class="header-subtitle">GovCloud Migration Readiness — Executive Summary</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Section 1: Portfolio Health KPIs -->
+      <section class="kpi-section">
+        <div class="kpi-grid">
+          <!-- Card 1: Portfolio MRS -->
+          <div class="kpi-card">
+            <div class="kpi-label">Portfolio MRS</div>
+            <div class="kpi-value">3.8</div>
+            <div class="kpi-subtext">Average Migration Readiness Score</div>
+            <div class="kpi-trend positive">
+              <span class="status-indicator green"></span>
+              ↑ +0.3 vs last month
+            </div>
+          </div>
+
+          <!-- Card 2: Portfolio Status -->
+          <div class="kpi-card">
+            <div class="kpi-label">Portfolio Status</div>
+            <div class="kpi-subtext" style="margin-bottom: 16px;">Classification distribution</div>
+            <div class="status-bar">
+              <div class="status-segment migrate-now" style="width: 17%;">2</div>
+              <div class="status-segment migrate-soon" style="width: 42%;">5</div>
+              <div class="status-segment migrate-later" style="width: 33%;">4</div>
+              <div class="status-segment hold" style="width: 8%;">1</div>
+            </div>
+            <div class="status-legend" style="margin-top: 12px;">
+              <div class="legend-item">
+                <div class="legend-color" style="background: #1E865C;"></div>
+                <span>Migrate Now: 2 (17%)</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color" style="background: #FDB913;"></div>
+                <span>Migrate Soon: 5 (42%)</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color" style="background: #FF9800;"></div>
+                <span>Migrate Later: 4 (33%)</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color" style="background: #E03E36;"></div>
+                <span>Hold: 1 (8%)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Timeline -->
+          <div class="kpi-card">
+            <div class="kpi-label">Timeline to Completion</div>
+            <div class="kpi-value" style="font-size: 2.5rem;">6-9 Months</div>
+            <div class="kpi-subtext">Estimated portfolio migration completion</div>
+            <div style="font-size: 12px; color: #626C7C; margin-top: 8px;">Confidence: ±2 months</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: Executive Narrative -->
+      <section class="narrative-section">
+        <div class="narrative-box">
+          <h3>Strategic Assessment</h3>
+          <p>
+            The portfolio of 12 RFPs demonstrates <strong>strong</strong> cloud migration readiness with an average MRS of 3.8. 59% are immediately actionable (Migrate Now/Soon), while 41% require remediation before proceeding. Current portfolio health is <strong>improving</strong>, with +0.3 month-over-month MRS gains driven by compliance maturity in federal contracts.
+          </p>
+          <p>
+            Primary migration drivers include <strong>VA Medical Center</strong> and <strong>DOD Logistics System</strong> (both Migrate Now status). Strategic constraints center on <strong>operational friction</strong> in state contracts and compliance gaps in county systems. Critical at-risks: <strong>County Health Dept - Miami</strong> (95% compliance gaps, budget constraints), <strong>VA Benefits Processing</strong> (ATO expired, renewal required), and <strong>State Tax Authority - Texas</strong> (operational complexity, limited resources). <strong>Recommendation:</strong> Prioritize 2 Conditional Award candidates for Q4 negotiation; resource security controls immediately to unblock 3 near-term migrations.
+          </p>
+          <p>
+            At current remediation velocity (est. 3 RFPs per quarter), portfolio completion is projected <strong>Q3 2026</strong>. Estimated resource allocation: 2 FTEs for 3 quarters. Budget impact: <strong>$450K-$600K</strong>. Board approval needed: budget commitment for security remediation. Next milestone: <strong>Federal Student Aid Office ATO by Q4 2025</strong>.
+          </p>
+        </div>
+      </section>
+
+      <!-- Section 3: At-Risk Items -->
+      <section class="at-risk-section">
+        <div class="at-risk-box">
+          <h3><span>⚠</span> Portfolio At-Risk Items</h3>
+          <ul class="at-risk-list">
+            <li class="at-risk-item">
+              <div class="at-risk-dot"></div>
+              <div class="at-risk-content">
+                <div class="at-risk-name">County Health Dept - Miami</div>
+                <div class="at-risk-reason">95% compliance gaps, budget constrained</div>
+              </div>
+            </li>
+            <li class="at-risk-item">
+              <div class="at-risk-dot"></div>
+              <div class="at-risk-content">
+                <div class="at-risk-name">VA Benefits Processing</div>
+                <div class="at-risk-reason">ATO expired, renewal required Q4</div>
+              </div>
+            </li>
+            <li class="at-risk-item">
+              <div class="at-risk-dot"></div>
+              <div class="at-risk-content">
+                <div class="at-risk-name">State Tax Authority - Texas</div>
+                <div class="at-risk-reason">Operational friction (high complexity, limited team)</div>
+              </div>
+            </li>
+          </ul>
+          <div class="at-risk-impact">
+            <strong>Impact:</strong> 3 at-risk items affect 25% of portfolio value. Mitigation in progress: targeted remediation sprints, resource reallocation, and stakeholder engagement.
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: Milestones & Timeline -->
+      <section class="timeline-section">
+        <h2>Migration Roadmap</h2>
+        <div class="timeline-container">
+          <div class="timeline-track">
+            <div class="timeline-line"></div>
+            
+            <div class="timeline-milestone">
+              <div class="timeline-marker on-track">✓</div>
+              <div class="timeline-info">
+                <div class="timeline-quarter">Q4 2025</div>
+                <div class="timeline-event">Federal Student Aid ATO Complete</div>
+                <div class="timeline-status on-track">On Track ✓</div>
+              </div>
+            </div>
+
+            <div class="timeline-milestone">
+              <div class="timeline-marker on-track">✓</div>
+              <div class="timeline-info">
+                <div class="timeline-quarter">Q1 2026</div>
+                <div class="timeline-event">+2 RFPs Migrations Complete</div>
+                <div class="timeline-status on-track">On Track ✓</div>
+              </div>
+            </div>
+
+            <div class="timeline-milestone">
+              <div class="timeline-marker at-risk">⚠</div>
+              <div class="timeline-info">
+                <div class="timeline-quarter">Q2 2026</div>
+                <div class="timeline-event">+3 RFPs Migrations Complete</div>
+                <div class="timeline-status at-risk">At Risk ⚠</div>
+              </div>
+            </div>
+
+            <div class="timeline-milestone">
+              <div class="timeline-marker projected">→</div>
+              <div class="timeline-info">
+                <div class="timeline-quarter">Q3 2026</div>
+                <div class="timeline-event">Portfolio Complete</div>
+                <div class="timeline-status projected">Projected ✓</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 5: Key Metrics Grid -->
+      <section class="metrics-section">
+        <h2>Key Metrics</h2>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-label">Avg Compliance Score</div>
+            <div class="metric-value">4.2<span style="font-size: 20px; color: #626C7C;">/5</span></div>
+            <div class="metric-trend">↑ +0.2 vs last month</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-label">Avg Readiness Score</div>
+            <div class="metric-value">3.1<span style="font-size: 20px; color: #626C7C;">/5</span></div>
+            <div class="metric-trend">↑ +0.1 vs last month</div>
+            <div class="metric-note">(Remediation in progress)</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-label">Critical Gaps</div>
+            <div class="metric-value danger">28</div>
+            <div class="metric-trend">↓ -5 vs last month</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-label">Resource Utilization</div>
+            <div class="metric-value">78%</div>
+            <div class="metric-trend">Sustainable</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: Decision Framework -->
+      <section class="actions-section">
+        <div class="actions-box">
+          <h3>Recommended Actions</h3>
+          <ol class="actions-list">
+            <li class="action-item">
+              <div class="action-title">
+                <span class="action-number">1.</span>
+                Fast-track Conditional Award negotiation for 2 Federal contracts
+              </div>
+              <div style="font-size: 14px; color: #626C7C; margin-left: 20px;">
+                Unlocks $[X]M ARR, accelerates timeline
+              </div>
+              <div class="action-meta">
+                <span><strong>Owner:</strong> Sales VP</span>
+                <span><strong>Due:</strong> Nov 30, 2025</span>
+              </div>
+            </li>
+            <li class="action-item">
+              <div class="action-title">
+                <span class="action-number">2.</span>
+                Resource security remediation to address compliance gaps
+              </div>
+              <div style="font-size: 14px; color: #626C7C; margin-left: 20px;">
+                Unblocks 3 at-risk State migrations
+              </div>
+              <div class="action-meta">
+                <span><strong>Owner:</strong> CIO</span>
+                <span><strong>Due:</strong> Dec 15, 2025</span>
+              </div>
+            </li>
+            <li class="action-item">
+              <div class="action-title">
+                <span class="action-number">3.</span>
+                Renew VA Benefits Processing ATO
+              </div>
+              <div style="font-size: 14px; color: #626C7C; margin-left: 20px;">
+                Maintains federal momentum, prevents timeline slip
+              </div>
+              <div class="action-meta">
+                <span><strong>Owner:</strong> Security Lead</span>
+                <span><strong>Due:</strong> Nov 20, 2025</span>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- Section 7: Board Talking Points -->
+      <section class="talking-points-section">
+        <div class="talking-points-header" onclick="toggleTalkingPoints()">
+          <h3>Key Messages for Board/Leadership</h3>
+          <span style="font-size: 24px; color: #626C7C;" id="talkingPointsArrow">▼</span>
+        </div>
+        <div class="talking-points-content" id="talkingPointsContent">
+          <div class="talking-point">
+            <div class="talking-point-text">
+              We are confident about our cloud migration timeline. Current portfolio health (MRS 3.8, +0.3 trending) indicates strong progress. We expect to complete 70%+ of migrations by Q2 2026.
+            </div>
+            <button class="copy-btn" onclick="copyToClipboard(this, 0)">Copy</button>
+          </div>
+
+          <div class="talking-point">
+            <div class="talking-point-text">
+              Compliance gaps and operational constraints represent our key challenges. Our mitigation plan includes targeted remediation sprints and resource reallocation. If executed as planned, timeline impact will be minimal (±2 months).
+            </div>
+            <button class="copy-btn" onclick="copyToClipboard(this, 1)">Copy</button>
+          </div>
+
+          <div class="talking-point">
+            <div class="talking-point-text">
+              We recommend board approval for $500K security remediation budget. This enables accelerated compliance maturity, unlocks 3 high-value migrations, and reduces portfolio risk.
+            </div>
+            <button class="copy-btn" onclick="copyToClipboard(this, 2)">Copy</button>
+          </div>
+
+          <div class="talking-point">
+            <div class="talking-point-text">
+              Next steps: (1) Approve budget by Nov 15, (2) Execute Conditional Award negotiation by Nov 30, (3) Complete Federal Student Aid ATO by Dec 31, (4) Reconvene for Q1 steering review on Jan 15.
+            </div>
+            <button class="copy-btn" onclick="copyToClipboard(this, 3)">Copy</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 8: Footer Actions -->
+      <section>
+        <div class="footer-actions">
+          <button class="btn btn--primary btn--sm" onclick="downloadBrief()">📄 Download Executive Brief (PDF)</button>
+          <button class="btn btn--secondary btn--sm" onclick="printDashboard()">🖨 Print This Dashboard</button>
+          <button class="btn btn--secondary btn--sm" onclick="exportData()">📊 Export Data (CSV)</button>
+          <button class="btn btn--secondary btn--sm" onclick="scheduleReview()">📅 Schedule Review</button>
+        </div>
+        
+        <div class="footer-meta">
+          <span><strong>Last updated:</strong> November 10, 2025, 10:00 PM EST</span>
+          <span><strong>Data source:</strong> MRS Dashboard, Gap Analyzer</span>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      © Open Source | Marsh-inspired branding | Not affiliated with Marsh McLennan | Licensed MIT/Apache 2.0 | v1.0
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

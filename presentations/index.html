@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marsh Power Automate Bridge &amp; Orchestration Hub</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-content">
+        <div class="marsh-logo">M</div>
+        <div class="header-title">
+          <h1>Marsh Power Automate Bridge &amp; Orchestration Hub</h1>
+          <div class="header-subtitle">Enterprise Workflow Automation &amp; Decision Pipeline</div>
+        </div>
+      </div>
+    </header>
+
+
+
+    <!-- Main Layout -->
+    <main class="main-layout">
+      <!-- Left Pane: Workflow Library -->
+      <aside class="left-pane">
+        <!-- Section 1: Orchestration Flows -->
+        <section class="config-section">
+          <h3>Orchestration Flows</h3>
+          <div id="flowsList" class="flows-list"></div>
+        </section>
+
+        <!-- Section 2: Flow Status Summary -->
+        <section class="config-section">
+          <h3>Flow Status Summary</h3>
+          <div class="status-badges">
+            <div class="status-badge status-active">✓ Active: <strong>7</strong> flows</div>
+            <div class="status-badge status-inactive">⚠ Inactive: <strong>1</strong> flow</div>
+            <div class="status-badge status-failed">🔴 Failed: <strong>0</strong> flows</div>
+            <div class="status-badge status-scheduled">⏱ Scheduled: <strong>8</strong> flows</div>
+          </div>
+        </section>
+
+        <!-- Section 3: Quick Actions -->
+        <section class="config-section">
+          <h3>Quick Actions</h3>
+          <button class="btn btn--secondary btn--full-width" onclick="viewAllFlows()">View All Flows</button>
+          <button class="btn btn--secondary btn--full-width" style="margin-top: 8px;" onclick="testFlow()">Test Flow</button>
+          <button class="btn btn--secondary btn--full-width" style="margin-top: 8px;" onclick="flowHealthReport()">Flow Health Report</button>
+          <button class="btn btn--secondary btn--full-width" style="margin-top: 8px;" onclick="configureNewFlow()">Configure New Flow</button>
+        </section>
+      </aside>
+
+      <!-- Center Pane: Workflow Diagram & Timeline -->
+      <div class="center-pane">
+        <div class="center-tabs">
+          <button class="tab-btn active" onclick="switchTab('pipeline')">Pipeline Overview</button>
+          <button class="tab-btn" onclick="switchTab('allflows')">All Flows</button>
+          <button class="tab-btn" onclick="switchTab('teams')">Teams Integration</button>
+          <button class="tab-btn" onclick="switchTab('powerbi')">Power BI Integration</button>
+          <button class="tab-btn" onclick="switchTab('errors')">Error Logs</button>
+        </div>
+        
+        <div id="tabPipeline" class="tab-content active">
+          <h2>Orchestration Pipeline Visualization</h2>
+          <div id="workflowDiagram" class="workflow-diagram">
+            <div class="preview-placeholder">
+              <p>Select a flow from the left pane to view diagram and execution details</p>
+            </div>
+          </div>
+          
+          <div id="executionTimeline" class="execution-timeline hidden">
+            <h3>Execution Timeline (Last 5 Runs)</h3>
+            <div id="timelineTable"></div>
+            <div id="latencyStats" class="latency-stats"></div>
+          </div>
+        </div>
+        
+        <div id="tabAllFlows" class="tab-content hidden">
+          <h2>All Flows</h2>
+          <div id="allFlowsTable"></div>
+        </div>
+        
+        <div id="tabTeams" class="tab-content hidden">
+          <h2>Teams Integration</h2>
+          <div id="teamsIntegration"></div>
+        </div>
+        
+        <div id="tabPowerBI" class="tab-content hidden">
+          <h2>Power BI Integration</h2>
+          <div id="powerBIIntegration"></div>
+        </div>
+        
+        <div id="tabErrors" class="tab-content hidden">
+          <h2>Error Logs &amp; History</h2>
+          <div id="errorLogs"></div>
+        </div>
+      </div>
+
+      <!-- Right Pane: Flow Configuration & Status -->
+      <aside class="right-pane" id="rightPane">
+        <div class="generation-panel">
+          <h3>Flow Configuration &amp; Monitoring</h3>
+          
+          <div id="flowDetails" class="flow-details">
+            <div class="preview-placeholder">
+              <p>Select a flow to view configuration and monitoring details</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      &copy; Open Source | Marsh-inspired branding | Not affiliated with Marsh McLennan | Licensed MIT/Apache 2.0 | v9.0 Power Automate Bridge
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

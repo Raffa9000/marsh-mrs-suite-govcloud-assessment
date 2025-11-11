@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marsh Compliance Attestation &amp; Audit Trail</title>
+  <style>
+    :root {
+  /* Marsh Brand Colors */
+  --marsh-navy: #002C77;
+  --marsh-cyan: #18B5E7;
+  --gap-gold: #FDB913;
+  --audit-slate: #5A6C7D;
+  --marsh-bg: #F4F8FB;
+  --marsh-text: #121A26;
+  --marsh-success: #1E865C;
+  --marsh-warning: #FFA500;
+  --marsh-orange: #FF9800;
+  --marsh-danger: #E03E36;
+  
+  --color-white: rgba(255, 255, 255, 1);
+  --color-cream-50: rgba(252, 252, 249, 1);
+  --color-gray-200: rgba(245, 245, 245, 1);
+  --color-gray-300: rgba(167, 169, 169, 1);
+  --color-gray-400: rgba(119, 124, 124, 1);
+  --color-slate-500: rgba(98, 108, 113, 1);
+  --color-brown-600: rgba(94, 82, 64, 1);
+  --color-charcoal-700: rgba(31, 33, 33, 1);
+  --color-charcoal-800: rgba(38, 40, 40, 1);
+  --color-teal-500: rgba(33, 128, 141, 1);
+  
+  --color-brown-600-rgb: 94, 82, 64;
+  --color-background: var(--marsh-bg);
+  --color-surface: var(--color-white);
+  --color-text: var(--marsh-text);
+  --color-text-secondary: var(--color-slate-500);
+  --color-border: rgba(var(--color-brown-600-rgb), 0.2);
+  
+  --status-draft: #9CA3AF;
+  --status-ready: #FDB913;
+  --status-signed: #1E865C;
+  --status-expired: #E03E36;
+  
+  --font-family-base: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-base: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 20px;
+  --font-size-3xl: 24px;
+  --font-size-4xl: 30px;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 550;
+  --font-weight-bold: 600;
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  
+  --space-4: 4px;
+  --space-6: 6px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+  
+  --radius-sm: 6px;
+  --radius-base: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+  
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--marsh-text);
+  background-color: var(--color-background);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  margin: 0;
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+}
+
+h1 { font-size: var(--font-size-3xl); }
+h2 { font-size: var(--font-size-2xl); }
+h3 { font-size: var(--font-size-xl); margin-bottom: var(--space-12); }
+h4 { font-size: var(--font-size-lg); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-16);
+  border-radius: var(--radius-base);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-standard);
+  border: none;
+  text-decoration: none;
+}
+
+.btn--primary {
+  background: var(--marsh-navy);
+  color: white;
+}
+
+.btn--primary:hover { background: #003a99; }
+
+.btn--secondary {
+  background: rgba(var(--color-brown-600-rgb), 0.12);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.btn--secondary:hover { background: rgba(var(--color-brown-600-rgb), 0.2); }
+
+.btn--danger {
+  background: var(--marsh-danger);
+  color: white;
+}
+
+.btn--danger:hover { background: #c03530; }
+
+.btn--sm {
+  padding: var(--space-4) var(--space-12);
+  font-size: var(--font-size-sm);
+}
+
+.btn--full {
+  width: 100%;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-header {
+  background: var(--marsh-navy);
+  color: white;
+  padding: var(--space-16) var(--space-24);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.marsh-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: white;
+  border-radius: var(--radius-sm);
+  margin-right: var(--space-12);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-2xl);
+  color: var(--marsh-navy);
+}
+
+.header-title h1 {
+  color: white;
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-4);
+}
+
+.header-subtitle {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.main-content {
+  display: flex;
+  flex: 1;
+}
+
+/* Left Sidebar - RFP List */
+.left-sidebar {
+  width: 24%;
+  min-width: 280px;
+  background: var(--marsh-bg);
+  border-right: 3px solid var(--audit-slate);
+  padding: var(--space-16);
+  overflow-y: auto;
+  position: sticky;
+  top: 0;
+  height: calc(100vh - 73px);
+}
+
+.search-box {
+  margin-bottom: var(--space-16);
+}
+
+.search-box input {
+  width: 100%;
+  padding: var(--space-8) var(--space-12);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  font-size: var(--font-size-sm);
+}
+
+.filter-section {
+  margin-bottom: var(--space-20);
+}
+
+.filter-section h4 {
+  font-size: var(--font-size-base);
+  margin-bottom: var(--space-12);
+  color: var(--marsh-navy);
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--space-8);
+  font-size: var(--font-size-sm);
+}
+
+.filter-option input {
+  margin-right: var(--space-8);
+}
+
+.filter-option label {
+  cursor: pointer;
+  user-select: none;
+}
+
+.rfp-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.rfp-item {
+  padding: var(--space-12);
+  margin-bottom: var(--space-8);
+  background: white;
+  border: 1px solid #CCC;
+  border-radius: var(--radius-base);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-standard);
+}
+
+.rfp-item:hover {
+  border-color: var(--audit-slate);
+  box-shadow: var(--shadow-sm);
+}
+
+.rfp-item.selected {
+  border-color: var(--audit-slate);
+  background: rgba(90, 108, 125, 0.08);
+  box-shadow: var(--shadow-sm);
+}
+
+.rfp-item-name {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-4);
+}
+
+.rfp-item-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-4);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 2px var(--space-6);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.status-draft { background: var(--status-draft); color: white; }
+.status-ready { background: var(--status-ready); color: var(--marsh-text); }
+.status-signed { background: var(--status-signed); color: white; }
+.status-expired { background: var(--status-expired); color: white; }
+
+/* Main Content Area */
+.content-area {
+  flex: 1;
+  padding: var(--space-24);
+  overflow-y: auto;
+  background: white;
+}
+
+.content-header {
+  margin-bottom: var(--space-24);
+}
+
+.content-title {
+  font-size: var(--font-size-3xl);
+  color: var(--marsh-navy);
+  margin-bottom: var(--space-8);
+}
+
+.content-badges {
+  display: flex;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+  margin-top: var(--space-12);
+}
+
+.badge {
+  display: inline-block;
+  padding: var(--space-4) var(--space-12);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  background: rgba(0, 44, 119, 0.1);
+  color: var(--marsh-navy);
+  border: 1px solid rgba(0, 44, 119, 0.2);
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 2px solid #DDD;
+  margin-bottom: var(--space-20);
+}
+
+.tab-btn {
+  padding: var(--space-12) var(--space-20);
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  transition: all var(--duration-fast) var(--ease-standard);
+  margin-bottom: -2px;
+}
+
+.tab-btn:hover {
+  color: var(--color-text);
+  background: rgba(var(--color-brown-600-rgb), 0.05);
+}
+
+.tab-btn.active {
+  color: var(--audit-slate);
+  border-bottom-color: var(--audit-slate);
+  font-weight: var(--font-weight-semibold);
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* Domain Cards */
+.domain-card {
+  background: white;
+  border: 1px solid #CCC;
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-16);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.domain-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-16);
+  background: var(--marsh-bg);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-standard);
+}
+
+.domain-header:hover {
+  background: rgba(90, 108, 125, 0.08);
+}
+
+.domain-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+}
+
+.domain-name {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--marsh-navy);
+}
+
+.score-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: var(--radius-base);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: white;
+}
+
+.score-5 { background: var(--marsh-success); }
+.score-4 { background: #3B82F6; }
+.score-3 { background: var(--gap-gold); }
+.score-2 { background: var(--marsh-orange); }
+.score-1 { background: var(--marsh-danger); }
+
+.confidence-badge {
+  padding: var(--space-4) var(--space-8);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  background: rgba(90, 108, 125, 0.1);
+  color: var(--audit-slate);
+}
+
+.domain-body {
+  padding: var(--space-20);
+  display: none;
+}
+
+.domain-body.expanded {
+  display: block;
+}
+
+.domain-section {
+  margin-bottom: var(--space-20);
+}
+
+.domain-section h4 {
+  font-size: var(--font-size-base);
+  color: var(--audit-slate);
+  margin-bottom: var(--space-8);
+  font-weight: var(--font-weight-semibold);
+}
+
+.domain-section p {
+  margin: 0;
+  line-height: 1.6;
+  color: var(--color-text);
+}
+
+.evidence-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.evidence-list li {
+  padding: var(--space-8);
+  margin-bottom: var(--space-4);
+  background: rgba(90, 108, 125, 0.05);
+  border-left: 3px solid var(--audit-slate);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+}
+
+.assessor-info {
+  display: flex;
+  gap: var(--space-16);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.version-history {
+  background: rgba(90, 108, 125, 0.05);
+  border: 1px solid #DDD;
+  border-radius: var(--radius-base);
+  padding: var(--space-12);
+  font-size: var(--font-size-sm);
+}
+
+.override-warning {
+  background: rgba(255, 165, 0, 0.1);
+  border: 1px solid var(--marsh-warning);
+  border-radius: var(--radius-base);
+  padding: var(--space-12);
+  font-size: var(--font-size-sm);
+  color: var(--marsh-text);
+}
+
+.domain-actions {
+  display: flex;
+  gap: var(--space-8);
+  margin-top: var(--space-12);
+}
+
+/* Control Family Cards */
+.control-family-card {
+  background: white;
+  border: 1px solid #CCC;
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-16);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.control-family-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-16);
+  background: var(--marsh-bg);
+  cursor: pointer;
+}
+
+.control-family-header:hover {
+  background: rgba(90, 108, 125, 0.08);
+}
+
+.family-name {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--marsh-navy);
+}
+
+.family-stats {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+  font-size: var(--font-size-sm);
+}
+
+.progress-bar {
+  width: 150px;
+  height: 20px;
+  background: #E5E7EB;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--marsh-success);
+  transition: width var(--duration-normal) var(--ease-standard);
+}
+
+.control-family-body {
+  padding: var(--space-20);
+  display: none;
+}
+
+.control-family-body.expanded {
+  display: block;
+}
+
+.controls-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.controls-table th {
+  text-align: left;
+  padding: var(--space-8);
+  background: var(--marsh-bg);
+  border-bottom: 2px solid #CCC;
+  font-weight: var(--font-weight-semibold);
+  color: var(--marsh-navy);
+}
+
+.controls-table td {
+  padding: var(--space-8);
+  border-bottom: 1px solid #DDD;
+}
+
+.control-status-icon {
+  font-size: var(--font-size-lg);
+}
+
+/* Audit Trail */
+.audit-timeline {
+  position: relative;
+  padding-left: var(--space-32);
+}
+
+.audit-timeline::before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--audit-slate);
+}
+
+.audit-event {
+  position: relative;
+  padding: var(--space-16);
+  margin-bottom: var(--space-16);
+  background: var(--marsh-bg);
+  border: 1px solid #CCC;
+  border-radius: var(--radius-base);
+}
+
+.audit-event::before {
+  content: '';
+  position: absolute;
+  left: -26px;
+  top: 20px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--audit-slate);
+  border: 2px solid white;
+}
+
+.audit-event-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-8);
+}
+
+.audit-event-date {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.audit-event-body {
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+}
+
+/* Right Sidebar - Sign-Off Panel */
+.right-sidebar {
+  width: 24%;
+  min-width: 280px;
+  background: var(--marsh-bg);
+  border-left: 1px solid #CCC;
+  padding: var(--space-16);
+  overflow-y: auto;
+  position: sticky;
+  top: 0;
+  height: calc(100vh - 73px);
+}
+
+.signoff-section {
+  background: white;
+  border: 1px solid #CCC;
+  border-radius: var(--radius-lg);
+  padding: var(--space-16);
+  margin-bottom: var(--space-16);
+}
+
+.signoff-section h4 {
+  margin-bottom: var(--space-12);
+  font-size: var(--font-size-base);
+  color: var(--marsh-navy);
+}
+
+.current-status {
+  text-align: center;
+  padding: var(--space-16);
+  margin-bottom: var(--space-16);
+}
+
+.status-badge-large {
+  display: inline-block;
+  padding: var(--space-8) var(--space-20);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--space-8);
+}
+
+.status-subtext {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.signoff-info {
+  padding: var(--space-12);
+  background: rgba(30, 134, 92, 0.1);
+  border: 1px solid var(--marsh-success);
+  border-radius: var(--radius-base);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-12);
+}
+
+.signoff-form {
+  margin-top: var(--space-16);
+}
+
+.form-group {
+  margin-bottom: var(--space-12);
+}
+
+.form-group label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--space-4);
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: var(--space-8);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-base);
+}
+
+.form-group textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-8);
+}
+
+.checkbox-group input {
+  margin-top: 4px;
+}
+
+.checkbox-group label {
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+}
+
+.certification-text {
+  background: rgba(90, 108, 125, 0.05);
+  border: 1px solid #CCC;
+  border-radius: var(--radius-base);
+  padding: var(--space-12);
+  font-size: var(--font-size-xs);
+  line-height: 1.5;
+  margin-bottom: var(--space-12);
+}
+
+.export-section {
+  background: white;
+  border: 1px solid #CCC;
+  border-radius: var(--radius-lg);
+  padding: var(--space-16);
+}
+
+.export-section h4 {
+  margin-bottom: var(--space-12);
+  font-size: var(--font-size-base);
+  color: var(--marsh-navy);
+}
+
+.export-btn {
+  width: 100%;
+  margin-bottom: var(--space-8);
+  text-align: left;
+  justify-content: flex-start;
+}
+
+.checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.checklist li {
+  padding: var(--space-8);
+  margin-bottom: var(--space-4);
+  display: flex;
+  align-items: center;
+  font-size: var(--font-size-sm);
+}
+
+.checklist li::before {
+  content: '☐';
+  margin-right: var(--space-8);
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+}
+
+.checklist li.complete::before {
+  content: '☑';
+  color: var(--marsh-success);
+}
+
+/* Modal */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.open {
+  display: flex;
+}
+
+.modal-content {
+  background: white;
+  border-radius: var(--radius-lg);
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-20);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--marsh-bg);
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: var(--marsh-navy);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  line-height: 1;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+}
+
+.modal-close:hover {
+  color: var(--marsh-navy);
+}
+
+.modal-body {
+  padding: var(--space-20);
+  overflow-y: auto;
+}
+
+.app-footer {
+  text-align: center;
+  padding: var(--space-24);
+  font-size: var(--font-size-sm);
+  color: #666;
+  background: white;
+  border-top: 1px solid #DDD;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: var(--space-32);
+  color: var(--color-text-secondary);
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: var(--space-16);
+  color: var(--audit-slate);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .left-sidebar,
+  .right-sidebar {
+    width: 280px;
+    min-width: 280px;
+  }
+}
+
+@media (max-width: 992px) {
+  .main-content {
+    flex-direction: column;
+  }
+  
+  .left-sidebar,
+  .right-sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    border: none;
+    border-bottom: 1px solid #CCC;
+  }
+}
+
+@media (max-width: 768px) {
+  .content-area {
+    padding: var(--space-16);
+  }
+  
+  .tabs {
+    overflow-x: auto;
+  }
+  
+  .tab-btn {
+    white-space: nowrap;
+  }
+}
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-content">
+        <div class="header-left">
+          <div class="marsh-logo">M</div>
+          <div class="header-title">
+            <h1>Marsh Compliance Attestation &amp; Audit Trail</h1>
+            <div class="header-subtitle">Assessment Evidence &amp; Sign-Off Documentation</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="main-content">
+      <!-- Left Sidebar - RFP Selection & Filter -->
+      <aside class="left-sidebar">
+        <div class="search-box">
+          <input type="text" id="searchRFP" placeholder="Search RFP by client name...">
+        </div>
+
+        <div class="filter-section">
+          <h4>Sign-Off Status</h4>
+          <div class="filter-option">
+            <input type="radio" id="statusAll" name="statusFilter" value="all" checked>
+            <label for="statusAll">All</label>
+          </div>
+          <div class="filter-option">
+            <input type="radio" id="statusDraft" name="statusFilter" value="Draft">
+            <label for="statusDraft">Draft</label>
+          </div>
+          <div class="filter-option">
+            <input type="radio" id="statusReady" name="statusFilter" value="Ready for Review">
+            <label for="statusReady">Ready for Review</label>
+          </div>
+          <div class="filter-option">
+            <input type="radio" id="statusSigned" name="statusFilter" value="Signed Off">
+            <label for="statusSigned">Signed Off</label>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <h4>Sort By</h4>
+          <div class="filter-option">
+            <input type="radio" id="sortModified" name="sortBy" value="modified" checked>
+            <label for="sortModified">Last Modified</label>
+          </div>
+          <div class="filter-option">
+            <input type="radio" id="sortName" name="sortBy" value="name">
+            <label for="sortName">RFP Name</label>
+          </div>
+          <div class="filter-option">
+            <input type="radio" id="sortStatus" name="sortBy" value="status">
+            <label for="sortStatus">Sign-Off Status</label>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <h4>RFP List</h4>
+          <ul class="rfp-list" id="rfpList">
+            <!-- RFP items will be populated here -->
+          </ul>
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <main class="content-area" id="contentArea">
+        <div class="empty-state" id="emptyState">
+          <div class="empty-state-icon">📋</div>
+          <h3>Select an RFP to view assessment details</h3>
+          <p>Choose an RFP from the list on the left to view its compliance documentation, justifications, and audit trail.</p>
+        </div>
+
+        <div id="assessmentDetail" style="display: none;">
+          <div class="content-header">
+            <h2 class="content-title" id="detailTitle">Assessment Detail</h2>
+            <div class="content-badges" id="detailBadges">
+              <!-- Badges will be populated here -->
+            </div>
+          </div>
+
+          <!-- Tab Navigation -->
+          <div class="tabs">
+            <button class="tab-btn active" data-tab="mrs">MRS Justifications</button>
+            <button class="tab-btn" data-tab="gap">Gap Assessments</button>
+            <button class="tab-btn" data-tab="audit">Audit Trail</button>
+          </div>
+
+          <!-- Tab Content: MRS Justifications -->
+          <div class="tab-content active" id="tab-mrs">
+            <div id="mrsJustifications">
+              <!-- Domain cards will be populated here -->
+            </div>
+          </div>
+
+          <!-- Tab Content: Gap Assessments -->
+          <div class="tab-content" id="tab-gap">
+            <div id="gapAssessments">
+              <!-- Control family cards will be populated here -->
+            </div>
+          </div>
+
+          <!-- Tab Content: Audit Trail -->
+          <div class="tab-content" id="tab-audit">
+            <div class="audit-timeline" id="auditTimeline">
+              <!-- Audit events will be populated here -->
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Right Sidebar - Sign-Off & Export -->
+      <aside class="right-sidebar">
+        <div class="signoff-section">
+          <h4>Assessment Status</h4>
+          <div class="current-status" id="currentStatus">
+            <div class="status-badge-large status-draft">Select RFP</div>
+            <div class="status-subtext">Choose an RFP to view status</div>
+          </div>
+          <div id="signoffActions">
+            <!-- Status-specific actions will appear here -->
+          </div>
+        </div>
+
+        <div class="signoff-section" id="completionChecklist" style="display: none;">
+          <h4>Completion Checklist</h4>
+          <ul class="checklist" id="checklistItems">
+            <!-- Checklist items will be populated here -->
+          </ul>
+        </div>
+
+        <div class="export-section">
+          <h4>Export Options</h4>
+          <button class="btn btn--secondary btn--sm export-btn" id="exportPdfBtn">
+            📄 Export Evidence Package (PDF)
+          </button>
+          <button class="btn btn--secondary btn--sm export-btn" id="exportZipBtn">
+            📦 Export Compliance Package (ZIP)
+          </button>
+          <button class="btn btn--secondary btn--sm export-btn" id="exportAuditBtn">
+            📊 Export Audit Trail (CSV)
+          </button>
+          <button class="btn btn--secondary btn--sm export-btn" id="exportCertBtn">
+            📜 Generate Certification (Text)
+          </button>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      © Open Source | Marsh-inspired branding | Not affiliated with Marsh McLennan | Licensed MIT/Apache 2.0 | v1.0
+    </footer>
+  </div>
+
+  <!-- Evidence Modal -->
+  <div class="modal" id="evidenceModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="evidenceModalTitle">Evidence Details</h3>
+        <button class="modal-close" id="evidenceModalClose">&times;</button>
+      </div>
+      <div class="modal-body" id="evidenceModalBody">
+        <!-- Evidence details will be populated here -->
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

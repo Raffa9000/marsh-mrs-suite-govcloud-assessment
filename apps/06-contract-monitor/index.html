@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marsh RFP Intake Analyzer</title>
+  <style>
+    :root {
+  /* Marsh Brand Colors */
+  --marsh-navy: #002C77;
+  --marsh-indigo: #4C51BF;
+  --marsh-indigo-light: rgba(76, 81, 191, 0.08);
+  --marsh-bg: #F4F8FB;
+  --marsh-text: #121A26;
+  --marsh-success: #1E865C;
+  --marsh-warning: #FFA500;
+  --marsh-danger: #E03E36;
+  
+  --color-white: rgba(255, 255, 255, 1);
+  --color-gray-200: rgba(245, 245, 245, 1);
+  --color-gray-300: rgba(167, 169, 169, 1);
+  --color-gray-400: rgba(119, 124, 124, 1);
+  --color-slate-500: rgba(98, 108, 113, 1);
+  --color-brown-600-rgb: 94, 82, 64;
+  
+  --color-background: var(--marsh-bg);
+  --color-surface: var(--color-white);
+  --color-text: var(--marsh-text);
+  --color-text-secondary: var(--color-slate-500);
+  --color-border: rgba(var(--color-brown-600-rgb), 0.2);
+  
+  --font-family-base: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-family-mono: "Courier New", Courier, monospace;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-base: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 20px;
+  --font-size-3xl: 24px;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 550;
+  --font-weight-bold: 600;
+  --line-height-normal: 1.5;
+  
+  --space-4: 4px;
+  --space-6: 6px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+  
+  --radius-sm: 6px;
+  --radius-base: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+  
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--marsh-text);
+  background-color: var(--color-background);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  margin: 0;
+  font-weight: var(--font-weight-semibold);
+}
+
+h1 { font-size: var(--font-size-3xl); }
+h2 { font-size: var(--font-size-2xl); }
+h3 { font-size: var(--font-size-xl); margin-bottom: var(--space-12); }
+h4 { font-size: var(--font-size-lg); margin-bottom: var(--space-8); }
+
+p { margin: 0 0 var(--space-16) 0; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-16);
+  border-radius: var(--radius-base);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-standard);
+  border: none;
+  text-decoration: none;
+  gap: var(--space-8);
+}
+
+.btn--primary {
+  background: var(--marsh-indigo);
+  color: white;
+}
+
+.btn--primary:hover { background: #3c3fa0; }
+.btn--primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn--secondary {
+  background: rgba(var(--color-brown-600-rgb), 0.12);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.btn--secondary:hover { background: rgba(var(--color-brown-600-rgb), 0.2); }
+
+.btn--sm {
+  padding: var(--space-6) var(--space-12);
+  font-size: var(--font-size-sm);
+}
+
+.btn--lg {
+  padding: var(--space-12) var(--space-24);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+
+.btn--full-width { width: 100%; }
+
+.form-control {
+  display: block;
+  width: 100%;
+  padding: var(--space-8) var(--space-12);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  transition: border-color var(--duration-fast) var(--ease-standard);
+}
+
+.form-control:focus {
+  border-color: var(--marsh-indigo);
+  outline: 2px solid var(--marsh-indigo);
+  outline-offset: 2px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: var(--space-8);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  color: var(--marsh-text);
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-header {
+  background: var(--marsh-navy);
+  color: white;
+  padding: var(--space-16) var(--space-24);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+}
+
+.marsh-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: white;
+  border-radius: var(--radius-sm);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-2xl);
+  color: var(--marsh-navy);
+}
+
+.header-title h1 {
+  color: white;
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-4);
+}
+
+.header-subtitle {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.main-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  background: white;
+}
+
+.left-pane {
+  width: 28%;
+  min-width: 320px;
+  background: var(--marsh-bg);
+  border-right: 3px solid var(--marsh-indigo);
+  overflow-y: auto;
+  padding: var(--space-16);
+}
+
+.center-pane {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-24);
+  background: white;
+}
+
+.right-pane {
+  width: 35%;
+  min-width: 380px;
+  background: var(--marsh-bg);
+  border-left: 3px solid var(--marsh-indigo);
+  overflow-y: auto;
+  padding: var(--space-16);
+}
+
+.input-section {
+  margin-bottom: var(--space-24);
+  padding-bottom: var(--space-16);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.input-section:last-child {
+  border-bottom: none;
+}
+
+.input-section h3 {
+  color: var(--marsh-indigo);
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--space-12);
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  padding: var(--space-8);
+  border-radius: var(--radius-sm);
+  transition: background var(--duration-fast);
+}
+
+.radio-label:hover {
+  background: rgba(76, 81, 191, 0.05);
+}
+
+.radio-label input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.upload-zone {
+  border: 2px dashed var(--marsh-indigo);
+  border-radius: var(--radius-base);
+  padding: var(--space-32);
+  text-align: center;
+  background: var(--marsh-indigo-light);
+  cursor: pointer;
+  transition: all var(--duration-normal);
+}
+
+.upload-zone:hover {
+  background: rgba(76, 81, 191, 0.12);
+  border-color: #3c3fa0;
+}
+
+.upload-zone.active {
+  border-color: #3c3fa0;
+  background: rgba(76, 81, 191, 0.15);
+}
+
+.upload-icon {
+  font-size: 48px;
+  color: var(--marsh-indigo);
+  margin-bottom: var(--space-8);
+}
+
+.file-preview {
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  padding: var(--space-12);
+  margin-top: var(--space-12);
+  font-size: var(--font-size-sm);
+}
+
+.method-description {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-4);
+  padding: var(--space-8);
+  background: rgba(76, 81, 191, 0.05);
+  border-radius: var(--radius-sm);
+}
+
+.progress-container {
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-24);
+  margin-bottom: var(--space-24);
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--color-gray-200);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin: var(--space-12) 0;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--marsh-indigo);
+  transition: width var(--duration-normal);
+}
+
+.status-message {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  padding: var(--space-12);
+  border-radius: var(--radius-base);
+  font-size: var(--font-size-sm);
+  margin-top: var(--space-12);
+}
+
+.status-message.success {
+  background: rgba(30, 134, 92, 0.1);
+  color: var(--marsh-success);
+  border: 1px solid rgba(30, 134, 92, 0.3);
+}
+
+.status-message.error {
+  background: rgba(224, 62, 54, 0.1);
+  color: var(--marsh-danger);
+  border: 1px solid rgba(224, 62, 54, 0.3);
+}
+
+.extraction-metadata {
+  background: var(--marsh-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  padding: var(--space-16);
+  margin-top: var(--space-16);
+  font-size: var(--font-size-sm);
+}
+
+.metadata-row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-6) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.metadata-row:last-child {
+  border-bottom: none;
+}
+
+.metadata-label {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.metadata-value {
+  color: var(--color-text);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+}
+
+.document-preview {
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-16);
+  margin-top: var(--space-16);
+}
+
+.preview-text {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  background: var(--marsh-bg);
+  padding: var(--space-12);
+  border-radius: var(--radius-sm);
+  max-height: 200px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.field-group {
+  margin-bottom: var(--space-20);
+  padding: var(--space-16);
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+}
+
+.field-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-8);
+}
+
+.field-value {
+  padding: var(--space-12);
+  background: var(--marsh-bg);
+  border-radius: var(--radius-sm);
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--space-8);
+}
+
+.field-evidence {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  padding: var(--space-8);
+  background: rgba(76, 81, 191, 0.05);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-4);
+  font-style: italic;
+}
+
+.confidence-badge {
+  display: inline-block;
+  padding: var(--space-4) var(--space-8);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.confidence-high {
+  background: rgba(30, 134, 92, 0.15);
+  color: var(--marsh-success);
+}
+
+.confidence-medium {
+  background: rgba(255, 165, 0, 0.15);
+  color: var(--marsh-warning);
+}
+
+.confidence-low {
+  background: rgba(224, 62, 54, 0.15);
+  color: var(--marsh-danger);
+}
+
+.validation-status {
+  padding: var(--space-16);
+  border-radius: var(--radius-base);
+  margin-top: var(--space-16);
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  font-weight: var(--font-weight-medium);
+}
+
+.validation-status.valid {
+  background: rgba(30, 134, 92, 0.1);
+  color: var(--marsh-success);
+  border: 1px solid rgba(30, 134, 92, 0.3);
+}
+
+.validation-status.warning {
+  background: rgba(255, 165, 0, 0.1);
+  color: var(--marsh-warning);
+  border: 1px solid rgba(255, 165, 0, 0.3);
+}
+
+.validation-status.invalid {
+  background: rgba(224, 62, 54, 0.1);
+  color: var(--marsh-danger);
+  border: 1px solid rgba(224, 62, 54, 0.3);
+}
+
+.flags-section {
+  margin-top: var(--space-16);
+}
+
+.flag-banner {
+  padding: var(--space-16);
+  border-radius: var(--radius-base);
+  margin-bottom: var(--space-12);
+  font-weight: var(--font-weight-medium);
+}
+
+.flag-banner.red {
+  background: rgba(224, 62, 54, 0.1);
+  color: var(--marsh-danger);
+  border: 2px solid var(--marsh-danger);
+}
+
+.flag-banner.green {
+  background: rgba(30, 134, 92, 0.1);
+  color: var(--marsh-success);
+  border: 2px solid var(--marsh-success);
+}
+
+.flag-banner.amber {
+  background: rgba(255, 165, 0, 0.1);
+  color: var(--marsh-warning);
+  border: 2px solid var(--marsh-warning);
+}
+
+.bottom-actions {
+  display: flex;
+  gap: var(--space-12);
+  margin-top: var(--space-24);
+  padding-top: var(--space-24);
+  border-top: 2px solid var(--color-border);
+}
+
+.app-footer {
+  text-align: center;
+  padding: var(--space-24);
+  font-size: var(--font-size-sm);
+  color: #666;
+  background: white;
+  border-top: 1px solid #DDD;
+}
+
+.edit-icon {
+  cursor: pointer;
+  color: var(--marsh-indigo);
+  font-size: var(--font-size-sm);
+}
+
+.edit-icon:hover {
+  color: #3c3fa0;
+}
+
+.hidden {
+  display: none;
+}
+
+@media (max-width: 1200px) {
+  .main-layout {
+    flex-direction: column;
+  }
+  
+  .left-pane,
+  .right-pane {
+    width: 100%;
+    border: none;
+    border-bottom: 3px solid var(--marsh-indigo);
+  }
+}
+
+@media (max-width: 768px) {
+  .left-pane,
+  .right-pane {
+    min-width: 0;
+  }
+  
+  .bottom-actions {
+    flex-direction: column;
+  }
+  
+  .bottom-actions .btn {
+    width: 100%;
+  }
+}
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-content">
+        <div class="marsh-logo">M</div>
+        <div class="header-title">
+          <h1>Marsh RFP Intake Analyzer</h1>
+          <div class="header-subtitle">Extract RFP Documents to Canonical Schema</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Layout -->
+    <main class="main-layout">
+      <!-- Left Pane: Upload & Settings -->
+      <aside class="left-pane">
+        <!-- Section 1: RFP Source -->
+        <section class="input-section">
+          <h3>RFP Source</h3>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="source" value="upload" checked onchange="toggleSource()">
+              <span>Upload PDF File</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="source" value="url" onchange="toggleSource()">
+              <span>Fetch from URL</span>
+            </label>
+          </div>
+          
+          <div id="uploadSection" style="margin-top: 16px;">
+            <div class="upload-zone" id="uploadZone">
+              <div class="upload-icon">📄</div>
+              <div>Drag PDF here or click to browse</div>
+              <input type="file" id="fileInput" accept=".pdf" style="display: none;" onchange="handleFileSelect(event)">
+            </div>
+            <div id="filePreview" class="file-preview hidden"></div>
+          </div>
+          
+          <div id="urlSection" class="hidden" style="margin-top: 16px;">
+            <input type="text" class="form-control" id="rfpUrl" placeholder="Enter RFP URL">
+            <button class="btn btn--primary btn--sm" style="margin-top: 8px; width: 100%;" onclick="fetchFromUrl()">Fetch</button>
+          </div>
+        </section>
+        
+        <!-- Section 2: Extraction Method -->
+        <section class="input-section">
+          <h3>Extraction Method</h3>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="method" value="regex" checked onchange="updateMethodDescription()">
+              <span>Regex-Only (Deterministic, Fast)</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="method" value="hybrid" onchange="updateMethodDescription()">
+              <span>Regex + LLM Validate (Augmented, Higher Recall)</span>
+            </label>
+          </div>
+          <div id="methodDescription" class="method-description">
+            Deterministic, repeatable, auditable. Best for standard RFP formats.
+          </div>
+        </section>
+        
+        <!-- Section 3: Validation Settings -->
+        <section class="input-section">
+          <h3>Validation Settings</h3>
+          <label class="checkbox-label">
+            <input type="checkbox" id="validateRequired" checked>
+            <span>Validate required fields</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="warnAmbiguous" checked>
+            <span>Warn on ambiguous mappings</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="flagDisqualifiers" checked>
+            <span>Flag disqualifiers</span>
+          </label>
+        </section>
+        
+        <!-- Section 4: Actions -->
+        <section class="input-section">
+          <h3>Actions</h3>
+          <button class="btn btn--primary btn--lg btn--full-width" id="extractBtn" onclick="extractRFP()" disabled>
+            Extract RFP
+          </button>
+          <button class="btn btn--secondary btn--full-width" style="margin-top: 8px;" onclick="resetForm()">
+            Reset
+          </button>
+        </section>
+      </aside>
+      
+      <!-- Center Pane: Progress & Preview -->
+      <div class="center-pane">
+        <h2 id="centerTitle">Extraction Progress</h2>
+        
+        <div id="placeholderMessage" class="progress-container">
+          <p style="text-align: center; color: #626C7C; font-size: 16px; margin: 40px 0;">
+            Upload an RFP to begin extraction
+          </p>
+        </div>
+        
+        <div id="progressSection" class="progress-container hidden">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+          </div>
+          <div id="progressStatus" style="text-align: center; color: #626C7C; font-size: 14px;">
+            Waiting to start...
+          </div>
+          <div id="progressMessage" class="status-message hidden"></div>
+        </div>
+        
+        <div id="extractionComplete" class="hidden">
+          <div class="extraction-metadata">
+            <h4 style="margin-bottom: 12px; color: var(--marsh-indigo);">Extraction Metadata</h4>
+            <div class="metadata-row">
+              <span class="metadata-label">File Hash:</span>
+              <span class="metadata-value" id="metaHash">-</span>
+            </div>
+            <div class="metadata-row">
+              <span class="metadata-label">Source:</span>
+              <span class="metadata-value" id="metaSource">-</span>
+            </div>
+            <div class="metadata-row">
+              <span class="metadata-label">Timestamp:</span>
+              <span class="metadata-value" id="metaTimestamp">-</span>
+            </div>
+            <div class="metadata-row">
+              <span class="metadata-label">Method:</span>
+              <span class="metadata-value" id="metaMethod">-</span>
+            </div>
+            <div class="metadata-row">
+              <span class="metadata-label">Extractor Version:</span>
+              <span class="metadata-value" id="metaVersion">-</span>
+            </div>
+            <div class="metadata-row">
+              <span class="metadata-label">Overall Confidence:</span>
+              <span class="metadata-value" id="metaConfidence">-</span>
+            </div>
+          </div>
+          
+          <div class="document-preview">
+            <h4 style="margin-bottom: 12px;">Document Preview (Extracted Text)</h4>
+            <div class="preview-text" id="previewText">No text available</div>
+            <button class="btn btn--secondary btn--sm" style="margin-top: 12px;" onclick="alert('Full text view would open in a modal in production.')">
+              View Full Text
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right Pane: Extracted Data Form -->
+      <aside class="right-pane">
+        <h2>Extracted Data (Canonical Schema)</h2>
+        <p style="font-size: 13px; color: #626C7C; margin-bottom: 24px;">
+          Review extracted fields. Click Edit to override any value.
+        </p>
+        
+        <div id="extractedFields">
+          <!-- Fields will be populated here after extraction -->
+          <div style="text-align: center; padding: 40px 0; color: #626C7C;">
+            Run extraction to populate fields
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      &copy; Open Source | Marsh-inspired branding | Not affiliated with Marsh McLennan | Licensed MIT/Apache 2.0 | v6.0 RFP Intake Analyzer
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
