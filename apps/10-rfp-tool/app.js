@@ -1,4 +1,4 @@
-// Enterprise RFP Analysis Suite - WITH EDIT FUNCTIONS
+// Enterprise RFP Analysis Suite - EDIT BUTTON VISIBLE
 
 const MOCK_RFPS = {
     'va-medical': { name: 'VA Medical Center - Phoenix', client: 'VA', sector: 'Healthcare', frameworks: ['HIPAA', 'FedRAMP'], content: `Q1.1: Describe your organization's healthcare IT experience with HIPAA compliance.\nQ1.2: Provide organizational chart for security leadership.\nQ2.1: Describe cloud infrastructure architecture.\nQ2.2: Explain network segmentation approach.\nQ2.3: How do you implement encryption?\nQ3.1: Describe NIST 800-53 control implementation.\nQ3.2: How do you achieve FedRAMP Moderate compliance?\nQ3.3: Explain IAM approach.\nQ4.1: Describe HIPAA BAA requirements and timeline.` },
@@ -201,7 +201,7 @@ class EnterpriseRFPTool {
                     <span style="background: #0052B4; color: white; padding: 2px 6px; border-radius: 2px; font-size: 10px;">${q.category}</span>
                     <span style="background: #e0e0e0; color: #333; padding: 2px 6px; border-radius: 2px; font-size: 10px;">${q.framework}</span>
                 </div>
-                <button onclick="tool.editQuestion('${q.id}')" style="margin-top: 8px; width: 100%; padding: 4px; background: white; color: #0052B4; border: 1px solid #0052B4; border-radius: 3px; font-size: 11px; cursor: pointer; font-weight: 500;">✏️ Edit Question</button>
+                <button onclick="event.stopPropagation(); tool.editQuestion('${q.id}')" style="margin-top: 8px; width: 100%; padding: 6px; background: white; color: #0052B4; border: 1px solid #0052B4; border-radius: 3px; font-size: 12px; cursor: pointer; font-weight: 500;">✏️ Edit</button>
             </div>
         `).join('');
     }
@@ -246,10 +246,10 @@ class EnterpriseRFPTool {
                 <div style="background: #f9f9f9; padding: 10px; border-radius: 3px; font-size: 13px; line-height: 1.5; margin-bottom: 10px; max-height: 100px; overflow-y: auto; color: #333; border: 1px solid #eee;">
                     ${resp?.text || '<em style="color: #999;">Not generated yet</em>'}
                 </div>
-                <div style="display: flex; gap: 8px;">
-                    <button onclick="tool.generateOneResponse('${q.id}')" style="flex: 1; padding: 8px; background: #0052B4; color: white; border: none; border-radius: 3px; font-size: 11px; cursor: pointer; font-weight: 500;">Generate</button>
-                    <button onclick="tool.editResponse('${q.id}')" style="flex: 1; padding: 8px; background: #0052B4; color: white; border: none; border-radius: 3px; font-size: 11px; cursor: pointer; font-weight: 500;">Edit</button>
-                    <button onclick="tool.copyResponse('${q.id}')" style="flex: 1; padding: 8px; background: #0052B4; color: white; border: none; border-radius: 3px; font-size: 11px; cursor: pointer; font-weight: 500;">Copy</button>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                    <button onclick="tool.generateOneResponse('${q.id}')" style="padding: 8px; background: #0052B4; color: white; border: none; border-radius: 3px; font-size: 11px; cursor: pointer; font-weight: 500;">Generate</button>
+                    <button onclick="tool.editResponse('${q.id}')" style="padding: 8px; background: #0052B4; color: white; border: none; border-radius: 3px; font-size: 11px; cursor: pointer; font-weight: 500;">✏️ Edit</button>
+                    <button onclick="tool.copyResponse('${q.id}')" style="padding: 8px; background: #0052B4; color: white; border: none; border-radius: 3px; font-size: 11px; cursor: pointer; font-weight: 500;">Copy</button>
                 </div>
             </div>
             `;
