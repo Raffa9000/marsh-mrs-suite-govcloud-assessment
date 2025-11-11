@@ -1,4 +1,4 @@
-// Enterprise RFP Analysis Suite - OPTIMIZED & LEAN
+// Enterprise RFP Analysis Suite - DASHBOARD FIX (No infinite loops)
 
 const MOCK_RFPS = {
     'va-medical': { name: 'VA Medical Center - Phoenix', client: 'VA', sector: 'Healthcare', frameworks: ['HIPAA', 'FedRAMP'], content: `Q1.1: Describe your organization's healthcare IT experience with HIPAA compliance.\nQ1.2: Provide organizational chart for security leadership.\nQ2.1: Describe cloud infrastructure architecture.\nQ2.2: Explain network segmentation approach.\nQ2.3: How do you implement encryption?\nQ3.1: Describe NIST 800-53 control implementation.\nQ3.2: How do you achieve FedRAMP Moderate compliance?\nQ3.3: Explain IAM approach.\nQ4.1: Describe HIPAA BAA requirements and timeline.` },
@@ -25,11 +25,11 @@ class EnterpriseRFPTool {
     constructor() {
         this.currentRFP = null;
         this.questions = [];
-        this.responses = new Map(); // Use Map instead of object
+        this.responses = new Map();
         this.allRFPs = [];
         this.teamMembers = [];
-        this.auditTrail = [];
-        this.displayMode = 'list'; // 'list' or 'grid'
+        this.chartsInitialized = false;
+        this.dashboardRendered = false;
         
         this.init();
     }
@@ -70,14 +70,14 @@ class EnterpriseRFPTool {
             { name: 'Sarah Chen', role: 'Compliance Lead', responses: 38 },
             { name: 'Mike Johnson', role: 'Technical Lead', responses: 42 }
         ];
-
-        this.auditTrail = [
-            { action: 'System initialized', timestamp: new Date().toLocaleString() }
-        ];
     }
 
     renderDashboard() {
-        // Activity Table
+        // ONLY render dashboard once - flag prevents re-rendering
+        if (this.dashboardRendered) return;
+        this.dashboardRendered = true;
+
+        // Activity Table - SIMPLE, NO CHARTS
         const tableBody = document.getElementById('activityTable');
         if (tableBody) {
             tableBody.innerHTML = this.allRFPs.slice(0, 5).map(rfp => `
@@ -95,19 +95,32 @@ class EnterpriseRFPTool {
         const quickStats = document.getElementById('quickStats');
         if (quickStats) {
             quickStats.innerHTML = `
-                <div class="stat-item"><strong>RFPs:</strong> ${this.allRFPs.length}</div>
+                <div class="stat-item"><strong>Total RFPs:</strong> ${this.allRFPs.length}</div>
                 <div class="stat-item"><strong>Questions:</strong> ${this.allRFPs.reduce((s, r) => s + r.questionsCount, 0)}</div>
+                <div class="stat-item"><strong>Status:</strong> ${this.allRFPs.filter(r => r.status === 'Completed').length} Complete</div>
                 <div class="stat-item"><strong>Team:</strong> ${this.teamMembers.length}</div>
             `;
         }
 
-        // Frameworks
+        // Frameworks - NO CHARTS, JUST TEXT
         const frameworkList = document.getElementById('frameworkList');
         if (frameworkList) {
             const fw = {};
             this.allRFPs.forEach(r => r.frameworks.forEach(f => { fw[f] = (fw[f] || 0) + 1; }));
-            frameworkList.innerHTML = Object.entries(fw).map(([f, c]) => `<div>${f}: ${c}</div>`).join('');
+            frameworkList.innerHTML = Object.entries(fw).map(([f, c]) => `<div style="padding: 8px; background: #f0f0f0; margin: 5px 0; border-radius: 4px;">${f}: <strong>${c}</strong></div>`).join('');
         }
+
+        // Priority - text only
+        const priorityList = document.getElementById('priorityList');
+        if (priorityList) {
+            priorityList.innerHTML = this.allRFPs
+                .filter(r => r.status === 'Blocked')
+                .slice(0, 3)
+                .map(r => `<div style="padding: 8px; background: #f8d7da; margin: 5px 0; border-radius: 4px;">⚠️ ${r.name}</div>`)
+                .join('');
+        }
+
+        console.log('✅ Dashboard rendered (one-time only)');
     }
 
     loadSampleRFP() {
@@ -123,7 +136,7 @@ class EnterpriseRFPTool {
         if (!this.currentRFP) return;
 
         this.questions = [];
-        this.responses.clear(); // Clear responses
+        this.responses.clear();
 
         const lines = this.currentRFP.content.split('\n');
         const pattern = /^Q(\d+\.\d+):\s*(.+)$/;
@@ -183,10 +196,8 @@ class EnterpriseRFPTool {
             (q.text.toLowerCase().includes(filter) || q.id.includes(filter))
         );
 
-        // Paginate to avoid rendering overload
         const pageSize = 20;
-        const page = 0;
-        const paged = filtered.slice(page * pageSize, (page + 1) * pageSize);
+        const paged = filtered.slice(0, pageSize);
 
         grid.innerHTML = paged.map(q => `
             <div class="question-card" onclick="tool.focusQuestion('${q.id}')">
@@ -215,18 +226,17 @@ class EnterpriseRFPTool {
         const container = document.getElementById('responsesContainer');
         if (!container) return;
 
-        // Render only visible responses (pagination)
-        const visible = this.questions.slice(0, 15); // Limit to 15
+        const visible = this.questions.slice(0, 15);
 
         container.innerHTML = visible.map(q => {
             const resp = this.responses.get(q.id);
             return `
             <div class="response-item" style="margin-bottom: 12px; padding: 12px; background: #f9f9f9; border-radius: 4px;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <strong>${q.id}: ${q.text.substring(0, 50)}...</strong>
+                    <strong style="font-size: 13px;">${q.id}: ${q.text.substring(0, 50)}...</strong>
                     <span style="background: ${resp ? '#d4edda' : '#fff3cd'}; padding: 2px 8px; font-size: 11px; border-radius: 3px;">${resp ? 'READY' : 'PENDING'}</span>
                 </div>
-                <div style="background: white; padding: 8px; border-radius: 3px; font-size: 12px; line-height: 1.4; margin-bottom: 8px; max-height: 100px; overflow-y: auto;">
+                <div style="background: white; padding: 8px; border-radius: 3px; font-size: 12px; line-height: 1.4; margin-bottom: 8px; max-height: 80px; overflow-y: auto;">
                     ${resp?.text || '<em>Not generated</em>'}
                 </div>
                 <div style="display: flex; gap: 8px;">
@@ -238,7 +248,7 @@ class EnterpriseRFPTool {
         }).join('');
 
         if (this.questions.length > 15) {
-            container.innerHTML += `<div style="text-align: center; color: #999; font-size: 12px; margin-top: 15px;">Showing 15 of ${this.questions.length} responses (first 15 displayed)</div>`;
+            container.innerHTML += `<div style="text-align: center; color: #999; font-size: 12px; margin-top: 15px;">Showing 15 of ${this.questions.length} responses</div>`;
         }
     }
 
@@ -270,9 +280,9 @@ class EnterpriseRFPTool {
         });
 
         document.getElementById('categoryBreakdown').innerHTML = Object.entries(cats)
-            .map(([c, n]) => `<div>${c}: ${n}</div>`).join('');
+            .map(([c, n]) => `<div style="padding: 4px 0;">${c}: ${n}</div>`).join('');
         document.getElementById('frameworkBreakdown').innerHTML = Object.entries(fws)
-            .map(([f, n]) => `<div>${f}: ${n}</div>`).join('');
+            .map(([f, n]) => `<div style="padding: 4px 0;">${f}: ${n}</div>`).join('');
     }
 
     exportCompletePackage() {
@@ -298,7 +308,7 @@ class EnterpriseRFPTool {
     }
 }
 
-// INIT
+// INIT - ONCE ONLY
 let tool = null;
 
 function switchView(view) {
@@ -311,5 +321,5 @@ function switchView(view) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    tool = new EnterpriseRFPTool();
+    if (!tool) tool = new EnterpriseRFPTool();
 });
