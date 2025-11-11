@@ -1,347 +1,281 @@
-// Enterprise RFP Analysis Suite - EDIT BUTTON VISIBLE
+// Enterprise RFP Q&A Tool - Industry-Grade Implementation
+// Inspired by: Inventive AI, DeepRFP, Arphie, AutoRFP
+// Core: Questions -> AI Responses -> Clause Voting -> Bulk Edit + Single Edit
 
-const MOCK_RFPS = {
-    'va-medical': { name: 'VA Medical Center - Phoenix', client: 'VA', sector: 'Healthcare', frameworks: ['HIPAA', 'FedRAMP'], content: `Q1.1: Describe your organization's healthcare IT experience with HIPAA compliance.\nQ1.2: Provide organizational chart for security leadership.\nQ2.1: Describe cloud infrastructure architecture.\nQ2.2: Explain network segmentation approach.\nQ2.3: How do you implement encryption?\nQ3.1: Describe NIST 800-53 control implementation.\nQ3.2: How do you achieve FedRAMP Moderate compliance?\nQ3.3: Explain IAM approach.\nQ4.1: Describe HIPAA BAA requirements and timeline.` },
-    'dod-modernization': { name: 'DOD IT Modernization', client: 'DOD', sector: 'Defense', frameworks: ['FedRAMP', 'NIST 800-171'], content: `Q1.1: Describe your understanding of DoD requirements.\nQ1.2: Experience with FedRAMP High systems?\nQ2.1: Implement NIST 800-171 controls?\nQ2.2: Incident response capability?\nQ3.1: Secure SDLC process?\nQ4.1: ATO authorization experience?` },
-    'cms-analytics': { name: 'CMS Analytics Platform', client: 'CMS', sector: 'Healthcare', frameworks: ['HIPAA', 'FedRAMP'], content: `Q1.1: CMS data security familiarity?\nQ1.2: Healthcare data analytics at scale?\nQ2.1: HIPAA compliance for large-scale processing?\nQ2.2: PII/PHI identification approach?\nQ3.1: Analytics capabilities?\nQ4.1: FedRAMP authorization path?` },
-    'fbi-datacenter': { name: 'FBI Data Center', client: 'FBI', sector: 'Defense', frameworks: ['CJIS', 'FedRAMP'], content: `Q1.1: CJIS database experience?\nQ1.2: Criminal justice information protection?\nQ2.1: CJIS security policy implementation?\nQ2.2: MFA for privileged access?\nQ3.1: Audit trail maintenance?` },
-    'state-dept': { name: 'State Dept Collaboration', client: 'State', sector: 'Federal', frameworks: ['FedRAMP', 'NIST'], content: `Q1.1: Government secure collaboration tools?\nQ1.2: Encryption protocols supported?\nQ2.1: State Department security requirements?\nQ2.2: Access controls approach?` },
-    'nih-research': { name: 'NIH Research Cloud', client: 'NIH', sector: 'Healthcare', frameworks: ['HIPAA', 'FISMA'], content: `Q1.1: Healthcare research data experience?\nQ1.2: Data management capabilities?\nQ2.1: HIPAA compliance for research?\nQ2.2: IRB requirements approach?` },
-    'census-bureau': { name: 'Census Bureau Systems', client: 'Census', sector: 'Federal', frameworks: ['FISMA', 'FedRAMP'], content: `Q1.1: Large-scale data collection systems?\nQ1.2: Confidential data protection?\nQ2.1: PII protection approach?\nQ2.2: Data anonymization methods?` }
+const SAMPLE_CLAUSES = {
+    'terms-payment': { id: 'terms-payment', text: 'Payment Terms: Net 30 upon invoice. 2% early payment discount if paid within 10 days.', votes: 0, rating: 0 },
+    'terms-liability': { id: 'terms-liability', text: 'Limitation of Liability: In no event shall either party be liable for indirect, incidental, or consequential damages.', votes: 0, rating: 0 },
+    'terms-confidentiality': { id: 'terms-confidentiality', text: 'Confidentiality: All information shared shall be treated as confidential and not disclosed to third parties.', votes: 0, rating: 0 },
+    'terms-indemnity': { id: 'terms-indemnity', text: 'Indemnification: Each party shall defend and indemnify the other against claims arising from its breach.', votes: 0, rating: 0 },
+    'terms-warranty': { id: 'terms-warranty', text: 'Warranty: Services provided are warranted to be performed in a professional and workmanlike manner.', votes: 0, rating: 0 },
+    'terms-termination': { id: 'terms-termination', text: 'Termination: Either party may terminate upon 30 days written notice. Outstanding obligations remain.', votes: 0, rating: 0 },
+    'data-security': { id: 'data-security', text: 'Data Security: Vendor shall implement reasonable security measures compliant with NIST 800-53 standards.', votes: 0, rating: 0 },
+    'data-privacy': { id: 'data-privacy', text: 'Data Privacy: All PII/PHI handled in compliance with HIPAA and GDPR requirements.', votes: 0, rating: 0 }
 };
 
-const DEMO_RESPONSES = {
-    'Security & Compliance': 'We implement comprehensive security controls aligned with regulatory requirements. Multi-layered approach includes encryption, access controls, continuous monitoring, and regular assessments.',
-    'Data & Privacy': 'Full compliance with privacy regulations through data classification, secure handling procedures, and restricted access controls. Annual training for all personnel.',
-    'Organizational': 'Security leadership reports to CTO/CFO. Clear governance structures with documented accountability and executive oversight.',
-    'Operations': 'Documented procedures with comprehensive standard operating procedures and change management workflows.',
-    'Technical Infrastructure': 'Cloud infrastructure with RTO/RPO of 4 hours/1 hour. Encryption at rest and in transit with defense-in-depth architecture.',
-    'Assessment & Audit': 'Quarterly security assessments including vulnerability scans and penetration testing. Risk-based remediation.',
-    'Incident Response': 'Documented procedures, 24/7 on-call support, regular tabletop exercises, compliant breach notification.',
-    'General': 'Committed to implementing best practices and maintaining strong security postures.'
+const AI_RESPONSE_TEMPLATES = {
+    'Security & Compliance': 'We maintain comprehensive security controls per NIST 800-53. Multi-layer encryption, 24/7 monitoring, SOC 2 Type II certified. Annual third-party assessments verify compliance.',
+    'Data & Privacy': 'HIPAA BAA included. PII encrypted at rest/transit. Data residency in US/EU regions per requirement. GDPR compliant with Data Processing Agreement.',
+    'Organizational': 'Security leadership reports to CISO. Governance framework with quarterly reviews. Incident response team available 24/7/365.',
+    'Technical': 'Cloud-native architecture. RTO 4hrs, RPO 1hr. Auto-failover, multi-region redundancy. 99.99% SLA guaranteed.',
+    'Operational': 'Patch management on monthly cycle. Change control board reviews all updates. Maintenance windows coordinated with client schedule.',
+    'General': 'Best-in-class practices implemented. Regular assessments ensure continuous improvement. Dedicated support team assigned.'
 };
 
-class EnterpriseRFPTool {
+class EnterpriseRFPApp {
     constructor() {
-        this.currentRFP = null;
         this.questions = [];
         this.responses = new Map();
-        this.allRFPs = [];
-        this.teamMembers = [];
-        this.dashboardRendered = false;
-        
+        this.clauseRepo = JSON.parse(JSON.stringify(SAMPLE_CLAUSES));
+        this.currentView = 'bulk';
+        this.selectedQuestionId = null;
         this.init();
     }
 
     init() {
-        this.loadDemoData();
+        this.loadSampleQuestions();
         this.setupEventListeners();
-        this.renderDashboard();
-        console.log('✅ RFP Tool Ready');
+        this.render();
     }
 
-    setupEventListeners() {
-        const rfpSelect = document.getElementById('rfpSelect');
-        if (rfpSelect) rfpSelect.addEventListener('change', () => this.loadSampleRFP());
-        
-        const filterQuestions = document.getElementById('filterQuestions');
-        if (filterQuestions) filterQuestions.addEventListener('input', () => this.renderQuestions());
-        
-        const categoryFilter = document.getElementById('categoryFilter');
-        if (categoryFilter) categoryFilter.addEventListener('change', () => this.renderQuestions());
-    }
-
-    loadDemoData() {
-        this.allRFPs = Object.entries(MOCK_RFPS).map(([id, rfp]) => {
-            const qCount = (rfp.content.match(/^Q\d+\.\d+:/gm) || []).length;
-            return {
-                id,
-                ...rfp,
-                questionsCount: qCount,
-                status: ['In Progress', 'Completed', 'Blocked'][Math.floor(Math.random() * 3)],
-                owner: ['John Smith', 'Sarah Chen', 'Mike Johnson'][Math.floor(Math.random() * 3)],
-                completionRate: Math.floor(Math.random() * 100)
-            };
-        });
-
-        this.teamMembers = [
-            { name: 'John Smith', role: 'RFP Analyst', responses: 45 },
-            { name: 'Sarah Chen', role: 'Compliance Lead', responses: 38 },
-            { name: 'Mike Johnson', role: 'Technical Lead', responses: 42 }
+    loadSampleQuestions() {
+        this.questions = [
+            { id: 'q1', text: 'Describe your security controls and compliance framework.', category: 'Security & Compliance', relatedClauses: ['terms-liability', 'data-security'] },
+            { id: 'q2', text: 'How do you protect PII and ensure data privacy?', category: 'Data & Privacy', relatedClauses: ['data-privacy', 'terms-confidentiality'] },
+            { id: 'q3', text: 'What is your organizational structure and governance?', category: 'Organizational', relatedClauses: [] },
+            { id: 'q4', text: 'Describe your cloud infrastructure and disaster recovery.', category: 'Technical', relatedClauses: ['terms-warranty'] },
+            { id: 'q5', text: 'What are your patch management and maintenance procedures?', category: 'Operational', relatedClauses: ['terms-payment'] },
+            { id: 'q6', text: 'How do you handle contract terms and liability?', category: 'General', relatedClauses: ['terms-liability', 'terms-indemnity', 'terms-termination'] }
         ];
     }
 
-    renderDashboard() {
-        if (this.dashboardRendered) return;
-        this.dashboardRendered = true;
-
-        const tableBody = document.getElementById('activityTable');
-        if (tableBody) {
-            tableBody.innerHTML = this.allRFPs.slice(0, 5).map(rfp => `
-                <tr>
-                    <td>${rfp.name}</td>
-                    <td><span class="status-badge status-${rfp.status.toLowerCase().replace(' ', '-')}">${rfp.status}</span></td>
-                    <td>${rfp.questionsCount}</td>
-                    <td>${rfp.owner}</td>
-                    <td><button onclick="tool.loadRFPDetail('${rfp.id}')" class="btn-secondary" style="padding: 6px 12px; font-size: 12px; width: auto;">Analyze</button></td>
-                </tr>
-            `).join('');
-        }
-
-        const quickStats = document.getElementById('quickStats');
-        if (quickStats) {
-            quickStats.innerHTML = `
-                <div class="stat-item"><strong>Total RFPs:</strong> ${this.allRFPs.length}</div>
-                <div class="stat-item"><strong>Questions:</strong> ${this.allRFPs.reduce((s, r) => s + r.questionsCount, 0)}</div>
-                <div class="stat-item"><strong>Status:</strong> ${this.allRFPs.filter(r => r.status === 'Completed').length} Complete</div>
-                <div class="stat-item"><strong>Team:</strong> ${this.teamMembers.length}</div>
-            `;
-        }
-
-        const frameworkList = document.getElementById('frameworkList');
-        if (frameworkList) {
-            const fw = {};
-            this.allRFPs.forEach(r => r.frameworks.forEach(f => { fw[f] = (fw[f] || 0) + 1; }));
-            frameworkList.innerHTML = Object.entries(fw).map(([f, c]) => `<div style="padding: 8px; background: #f0f0f0; margin: 5px 0; border-radius: 4px; color: #333; font-weight: 500;">${f}: <strong>${c}</strong></div>`).join('');
-        }
-
-        const priorityList = document.getElementById('priorityList');
-        if (priorityList) {
-            priorityList.innerHTML = this.allRFPs
-                .filter(r => r.status === 'Blocked')
-                .slice(0, 3)
-                .map(r => `<div style="padding: 8px; background: #fff3cd; margin: 5px 0; border-radius: 4px; color: #333;">⚠️ ${r.name}</div>`)
-                .join('');
-        }
-
-        console.log('✅ Dashboard rendered');
-    }
-
-    loadSampleRFP() {
-        const selectValue = document.getElementById('rfpSelect').value;
-        if (selectValue && MOCK_RFPS[selectValue]) {
-            this.currentRFP = MOCK_RFPS[selectValue];
-            document.getElementById('uploadStatus').textContent = `✅ ${this.currentRFP.name}`;
-            this.extractAndAnalyze();
-        }
-    }
-
-    extractAndAnalyze() {
-        if (!this.currentRFP) return;
-
-        this.questions = [];
-        this.responses.clear();
-
-        const lines = this.currentRFP.content.split('\n');
-        const pattern = /^Q(\d+\.\d+):\s*(.+)$/;
-
-        lines.forEach((line) => {
-            const match = line.match(pattern);
-            if (match) {
-                const text = match[2];
-                this.questions.push({
-                    id: `Q${this.questions.length + 1}`,
-                    text,
-                    category: this.classify(text),
-                    framework: this.detectFrameworks(text)
-                });
-            }
+    setupEventListeners() {
+        document.addEventListener('click', (e) => {
+            if (e.target.dataset.action === 'bulk-mode') this.currentView = 'bulk';
+            else if (e.target.dataset.action === 'single-mode') this.currentView = 'single';
+            else if (e.target.dataset.action === 'clause-repo') this.currentView = 'clause-repo';
+            this.render();
         });
-
-        const qCount = document.getElementById('qCount');
-        if (qCount) qCount.textContent = this.questions.length;
-
-        this.renderQuestions();
-        this.renderAnalytics();
-        console.log(`✅ Extracted ${this.questions.length} questions`);
     }
 
-    classify(text) {
-        const t = text.toLowerCase();
-        if (/security|compliance|control|nist|encrypt|audit/i.test(t)) return 'Security & Compliance';
-        if (/data|privacy|hipaa|gdpr|pii/i.test(t)) return 'Data & Privacy';
-        if (/organization|structure|governance|leadership/i.test(t)) return 'Organizational';
-        if (/process|procedure|operation|maintenance/i.test(t)) return 'Operations';
-        if (/system|infrastructure|cloud|network|architecture/i.test(t)) return 'Technical Infrastructure';
-        if (/assessment|audit|test|evaluation|scan/i.test(t)) return 'Assessment & Audit';
-        if (/incident|breach|recovery|disaster/i.test(t)) return 'Incident Response';
-        return 'General';
-    }
+    render() {
+        const app = document.getElementById('app');
+        if (!app) return;
 
-    detectFrameworks(text) {
-        const fw = [];
-        if (/NIST|800-53|800-171/i.test(text)) fw.push('NIST');
-        if (/FedRAMP|ATO/i.test(text)) fw.push('FedRAMP');
-        if (/HIPAA|BAA|PHI/i.test(text)) fw.push('HIPAA');
-        if (/CJIS/i.test(text)) fw.push('CJIS');
-        if (/FISMA/i.test(text)) fw.push('FISMA');
-        return fw.length > 0 ? fw.join(', ') : 'General';
-    }
-
-    renderQuestions() {
-        const grid = document.getElementById('questionsGrid');
-        if (!grid) return;
-
-        const category = document.getElementById('categoryFilter')?.value || '';
-        const filter = document.getElementById('filterQuestions')?.value.toLowerCase() || '';
-
-        let filtered = this.questions.filter(q =>
-            (!category || q.category === category) &&
-            (q.text.toLowerCase().includes(filter) || q.id.includes(filter))
-        );
-
-        const pageSize = 20;
-        const paged = filtered.slice(0, pageSize);
-
-        grid.innerHTML = paged.map(q => `
-            <div class="question-card" onclick="tool.focusQuestion('${q.id}')">
-                <div class="question-number">${q.id}</div>
-                <div class="question-text">${q.text}</div>
-                <div class="question-meta">
-                    <span style="background: #0052B4; color: white; padding: 2px 6px; border-radius: 2px; font-size: 10px;">${q.category}</span>
-                    <span style="background: #e0e0e0; color: #333; padding: 2px 6px; border-radius: 2px; font-size: 10px;">${q.framework}</span>
+        app.innerHTML = `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; min-height: 100vh;">
+                ${this.renderHeader()}
+                <div style="max-width: 1400px; margin: 0 auto; padding: 20px;">
+                    ${this.currentView === 'bulk' ? this.renderBulkView() : 
+                      this.currentView === 'single' ? this.renderSingleView() :
+                      this.renderClauseRepo()}
                 </div>
-                <button onclick="event.stopPropagation(); tool.editQuestion('${q.id}')" style="margin-top: 8px; width: 100%; padding: 6px; background: white; color: #0052B4; border: 1px solid #0052B4; border-radius: 3px; font-size: 12px; cursor: pointer; font-weight: 500;">✏️ Edit</button>
             </div>
-        `).join('');
+        `;
     }
 
-    editQuestion(questionId) {
-        const q = this.questions.find(qq => qq.id === questionId);
-        if (!q) return;
+    renderHeader() {
+        return `
+            <div style="background: linear-gradient(135deg, #002C77 0%, #0052B4 100%); color: white; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <div style="max-width: 1400px; margin: 0 auto;">
+                    <h1 style="margin: 0; font-size: 28px;">🎯 RFP Q&A + Clause Voting System</h1>
+                    <p style="margin: 5px 0 0 0; opacity: 0.9;">AI-Generated Responses | Bulk Processing | Per-Question Edit | Clause Repository with Voting</p>
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button data-action="bulk-mode" style="padding: 10px 16px; background: ${this.currentView === 'bulk' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)'}; color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; cursor: pointer; font-weight: 500;">📋 Bulk Q&A</button>
+                        <button data-action="single-mode" style="padding: 10px 16px; background: ${this.currentView === 'single' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)'}; color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; cursor: pointer; font-weight: 500;">🎯 Single Q&A</button>
+                        <button data-action="clause-repo" style="padding: 10px 16px; background: ${this.currentView === 'clause-repo' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)'}; color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; cursor: pointer; font-weight: 500;">⭐ Clause Repo</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderBulkView() {
+        return `
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div style="grid-column: 1/-1;">
+                    <button onclick="app.generateAllResponses()" style="padding: 12px 24px; background: #0052B4; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%;">
+                        ⚡ GENERATE ALL RESPONSES AT ONCE
+                    </button>
+                </div>
+                ${this.questions.map(q => `
+                    <div style="background: white; padding: 16px; border-radius: 8px; border-left: 4px solid #0052B4; box-shadow: 0 2px 4px rgba(0,0,0,0.08);">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                            <strong style="color: #333;">${q.id.toUpperCase()}: ${q.text.substring(0, 60)}...</strong>
+                            <span style="background: #0052B4; color: white; padding: 4px 8px; border-radius: 3px; font-size: 11px; font-weight: 600; white-space: nowrap;">
+                                ${this.responses.has(q.id) ? '✅ READY' : '⏳ PENDING'}
+                            </span>
+                        </div>
+                        <div style="background: #f9f9f9; padding: 10px; border-radius: 4px; font-size: 13px; line-height: 1.5; color: #555; margin-bottom: 10px; max-height: 80px; overflow-y: auto;">
+                            ${this.responses.has(q.id) ? this.responses.get(q.id).text : '<em style="color: #999;">Not generated yet</em>'}
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="app.generateResponse('${q.id}')" style="flex: 1; padding: 8px; background: #0052B4; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 500;">Gen</button>
+                            <button onclick="app.editResponse('${q.id}')" style="flex: 1; padding: 8px; background: #0052B4; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 500;">✏️ Edit</button>
+                            <button onclick="app.viewClauses('${q.id}')" style="flex: 1; padding: 8px; background: #28a745; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 500;">📌 Clauses</button>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    renderSingleView() {
+        return `
+            <div style="background: white; padding: 24px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                <h2 style="color: #333; margin-bottom: 20px;">Select a Question to Answer</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-bottom: 30px;">
+                    ${this.questions.map(q => `
+                        <div onclick="app.selectQuestion('${q.id}')" style="padding: 16px; background: ${this.selectedQuestionId === q.id ? '#e8f4f8' : '#f9f9f9'}; border: 2px solid ${this.selectedQuestionId === q.id ? '#0052B4' : '#ddd'}; border-radius: 6px; cursor: pointer; transition: all 0.2s;">
+                            <strong style="color: #333;">${q.id.toUpperCase()}</strong>
+                            <div style="font-size: 13px; color: #666; margin-top: 8px;">${q.text}</div>
+                            <div style="font-size: 11px; color: #999; margin-top: 8px;">Category: ${q.category}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                ${this.selectedQuestionId ? this.renderSingleQuestionEditor() : '<div style="color: #999; text-align: center; padding: 40px;">Select a question to begin</div>'}
+            </div>
+        `;
+    }
+
+    renderSingleQuestionEditor() {
+        const q = this.questions.find(qq => qq.id === this.selectedQuestionId);
+        const resp = this.responses.get(this.selectedQuestionId);
         
-        const newText = prompt('Edit question text:', q.text);
-        if (newText !== null && newText.trim()) {
-            q.text = newText;
-            this.renderQuestions();
-            console.log(`✅ Edited ${questionId}`);
-        }
+        return `
+            <div style="border-top: 2px solid #ddd; padding-top: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="color: #333; margin: 0;">Question: ${q.text}</h3>
+                    <span style="background: ${resp ? '#d4edda' : '#fff3cd'}; color: ${resp ? '#155724' : '#856404'}; padding: 6px 12px; border-radius: 4px; font-weight: 500; font-size: 12px;">
+                        ${resp ? '✅ COMPLETE' : '⏳ PENDING'}
+                    </span>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #333;">Response:</label>
+                    <textarea id="responseEditor" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; line-height: 1.6; min-height: 150px; font-family: inherit;" placeholder="Enter or edit response...">${resp ? resp.text : ''}</textarea>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <button onclick="app.generateResponse('${q.id}')" style="flex: 1; padding: 12px; background: #0052B4; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px;">🤖 Generate with AI</button>
+                    <button onclick="app.saveSingleResponse('${q.id}')" style="flex: 1; padding: 12px; background: #28a745; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px;">💾 Save Response</button>
+                </div>
+                
+                <div style="background: #f9f9f9; padding: 16px; border-radius: 6px; margin-bottom: 20px;">
+                    <strong style="display: block; margin-bottom: 10px; color: #333;">Related Clauses:</strong>
+                    ${q.relatedClauses.length > 0 ? 
+                        q.relatedClauses.map(cid => {
+                            const clause = this.clauseRepo[cid];
+                            return `
+                                <div style="padding: 10px; background: white; border-radius: 4px; margin: 8px 0; border-left: 3px solid #28a745;">
+                                    <div style="font-size: 12px; color: #666;">${clause.text}</div>
+                                </div>
+                            `;
+                        }).join('')
+                        : '<em style="color: #999;">No related clauses</em>'}
+                </div>
+                
+                <button onclick="app.exportSingleResponse('${q.id}')" style="width: 100%; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px;">📥 Export This Response</button>
+            </div>
+        `;
+    }
+
+    renderClauseRepo() {
+        return `
+            <div>
+                <h2 style="color: #333; margin-bottom: 20px;">Clause Repository (Vote & Rate)</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 15px;">
+                    ${Object.entries(this.clauseRepo).map(([id, clause]) => `
+                        <div style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.08);">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                                <strong style="color: #333;">📌 ${id}</strong>
+                                <div style="display: flex; gap: 5px;">
+                                    <span style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 3px; font-size: 11px; font-weight: 600;">👍 ${clause.votes}</span>
+                                    <span style="background: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 3px; font-size: 11px; font-weight: 600;">⭐ ${clause.rating.toFixed(1)}</span>
+                                </div>
+                            </div>
+                            <div style="background: #f9f9f9; padding: 10px; border-radius: 4px; font-size: 13px; line-height: 1.5; color: #555; margin-bottom: 12px;">
+                                ${clause.text}
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button onclick="app.voteClause('${id}', 'up')" style="flex: 1; padding: 8px; background: #d4edda; color: #155724; border: 1px solid #28a745; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">👍 Vote Up</button>
+                                <button onclick="app.voteClause('${id}', 'down')" style="flex: 1; padding: 8px; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">👎 Vote Down</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    generateResponse(qid) {
+        const q = this.questions.find(qq => qq.id === qid);
+        const template = AI_RESPONSE_TEMPLATES[q.category] || AI_RESPONSE_TEMPLATES['General'];
+        this.responses.set(qid, { text: template });
+        this.render();
     }
 
     async generateAllResponses() {
-        for (let i = 0; i < this.questions.length; i++) {
-            const q = this.questions[i];
-            const template = DEMO_RESPONSES[q.category] || DEMO_RESPONSES['General'];
-            this.responses.set(q.id, { text: template });
-            await new Promise(r => setTimeout(r, 50));
+        for (const q of this.questions) {
+            this.generateResponse(q.id);
+            await new Promise(r => setTimeout(r, 100));
         }
-        this.renderResponses();
-        alert(`✅ Generated ${this.questions.length} responses`);
+        alert('✅ All responses generated!');
     }
 
-    renderResponses() {
-        const container = document.getElementById('responsesContainer');
-        if (!container) return;
-
-        const visible = this.questions.slice(0, 15);
-
-        container.innerHTML = visible.map(q => {
-            const resp = this.responses.get(q.id);
-            return `
-            <div style="margin-bottom: 12px; padding: 12px; background: white; border: 1px solid #ddd; border-radius: 4px; border-left: 4px solid #0052B4;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center;">
-                    <strong style="font-size: 13px; color: #333;">${q.id}: ${q.text.substring(0, 50)}...</strong>
-                    <span style="background: ${resp ? '#d4edda' : '#fff3cd'}; color: ${resp ? '#155724' : '#856404'}; padding: 2px 8px; font-size: 11px; border-radius: 3px; font-weight: 500;">${resp ? 'READY' : 'PENDING'}</span>
-                </div>
-                <div style="background: #f9f9f9; padding: 10px; border-radius: 3px; font-size: 13px; line-height: 1.5; margin-bottom: 10px; max-height: 100px; overflow-y: auto; color: #333; border: 1px solid #eee;">
-                    ${resp?.text || '<em style="color: #999;">Not generated yet</em>'}
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
-                    <button onclick="tool.generateOneResponse('${q.id}')" style="padding: 8px; background: #0052B4; color: white; border: none; border-radius: 3px; font-size: 11px; cursor: pointer; font-weight: 500;">Generate</button>
-                    <button onclick="tool.editResponse('${q.id}')" style="padding: 8px; background: #0052B4; color: white; border: none; border-radius: 3px; font-size: 11px; cursor: pointer; font-weight: 500;">✏️ Edit</button>
-                    <button onclick="tool.copyResponse('${q.id}')" style="padding: 8px; background: #0052B4; color: white; border: none; border-radius: 3px; font-size: 11px; cursor: pointer; font-weight: 500;">Copy</button>
-                </div>
-            </div>
-            `;
-        }).join('');
-
-        if (this.questions.length > 15) {
-            container.innerHTML += `<div style="text-align: center; color: #666; font-size: 12px; margin-top: 15px; padding: 10px; background: #f9f9f9; border-radius: 4px;">Showing 15 of ${this.questions.length} responses</div>`;
+    editResponse(qid) {
+        const current = this.responses.get(qid)?.text || '';
+        const updated = prompt('Edit response:', current);
+        if (updated !== null && updated.trim()) {
+            this.responses.set(qid, { text: updated });
+            this.render();
         }
     }
 
-    generateOneResponse(questionId) {
-        const q = this.questions.find(qq => qq.id === questionId);
-        if (!q) return;
-        const template = DEMO_RESPONSES[q.category] || DEMO_RESPONSES['General'];
-        this.responses.set(questionId, { text: template });
-        this.renderResponses();
-    }
-
-    editResponse(questionId) {
-        const resp = this.responses.get(questionId);
-        if (!resp) {
-            alert('Generate a response first');
-            return;
-        }
-        
-        const newText = prompt('Edit response:', resp.text);
-        if (newText !== null && newText.trim()) {
-            this.responses.set(questionId, { text: newText });
-            this.renderResponses();
-            console.log(`✅ Edited response for ${questionId}`);
+    saveSingleResponse(qid) {
+        const editor = document.getElementById('responseEditor');
+        if (editor && editor.value.trim()) {
+            this.responses.set(qid, { text: editor.value });
+            this.selectedQuestionId = null;
+            alert('✅ Response saved!');
+            this.render();
         }
     }
 
-    focusQuestion(questionId) {
-        this.generateOneResponse(questionId);
+    selectQuestion(qid) {
+        this.selectedQuestionId = this.selectedQuestionId === qid ? null : qid;
+        this.render();
     }
 
-    copyResponse(questionId) {
-        const text = this.responses.get(questionId)?.text;
-        if (text) {
-            navigator.clipboard.writeText(text).then(() => alert('✅ Copied!'));
-        }
-    }
-
-    renderAnalytics() {
-        const cats = {};
-        const fws = {};
-        this.questions.forEach(q => {
-            cats[q.category] = (cats[q.category] || 0) + 1;
-            q.framework.split(', ').forEach(f => { fws[f] = (fws[f] || 0) + 1; });
-        });
-
-        document.getElementById('categoryBreakdown').innerHTML = Object.entries(cats)
-            .map(([c, n]) => `<div style="padding: 4px 0; color: #333;">${c}: ${n}</div>`).join('');
-        document.getElementById('frameworkBreakdown').innerHTML = Object.entries(fws)
-            .map(([f, n]) => `<div style="padding: 4px 0; color: #333;">${f}: ${n}</div>`).join('');
-    }
-
-    exportCompletePackage() {
-        let csv = 'ID,Question,Category,Framework,Response\n';
-        this.questions.forEach(q => {
-            const resp = this.responses.get(q.id)?.text || '';
-            csv += `"${q.id}","${q.text.replace(/"/g, '""')}","${q.category}","${q.framework}","${resp.replace(/"/g, '""')}"\n`;
-        });
-
+    exportSingleResponse(qid) {
+        const q = this.questions.find(qq => qq.id === qid);
+        const resp = this.responses.get(qid);
+        const csv = `"Question","Response"\n"${q.text}","${resp?.text || ''}"`;
         const a = document.createElement('a');
         a.href = 'data:text/csv,' + encodeURIComponent(csv);
-        a.download = `RFP_${Date.now()}.csv`;
+        a.download = `${qid}_response.csv`;
         a.click();
-        alert('✅ Exported!');
     }
 
-    loadRFPDetail(rfpId) {
-        const rfp = MOCK_RFPS[rfpId];
-        if (rfp) {
-            document.getElementById('rfpSelect').value = rfpId;
-            this.loadSampleRFP();
+    viewClauses(qid) {
+        const q = this.questions.find(qq => qq.id === qid);
+        alert(`Related clauses: ${q.relatedClauses.map(cid => this.clauseRepo[cid].text).join('\n\n')}`);
+    }
+
+    voteClause(cid, direction) {
+        const clause = this.clauseRepo[cid];
+        if (direction === 'up') {
+            clause.votes++;
+            clause.rating = Math.min(5, clause.rating + 0.5);
+        } else {
+            clause.votes--;
+            clause.rating = Math.max(0, clause.rating - 0.5);
         }
+        this.render();
     }
 }
 
-let tool = null;
-
-function switchView(view) {
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    const target = document.getElementById(`${view}-view`);
-    if (target) target.classList.add('active');
-    
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    event?.target?.classList.add('active');
-}
-
+let app = null;
 window.addEventListener('DOMContentLoaded', () => {
-    if (!tool) tool = new EnterpriseRFPTool();
+    app = new EnterpriseRFPApp();
 });
