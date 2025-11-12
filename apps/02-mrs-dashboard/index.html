@@ -20,6 +20,7 @@
       <div class="topbar__actions">
         <button class="btn btn--ghost" id="helpBtn">Help</button>
         <button class="btn btn--ghost" id="runTestsBtn">Demo Data</button>
+        <button class="btn btn--primary" id="loadMockBtn">Load 48 Mock RFPs</button>
       </div>
     </header>
 
@@ -39,7 +40,6 @@
             <label>Agency / Sector
               <input type="text" id="agency" placeholder="e.g., CMS / Healthcare"/>
             </label>
-
             <label>Compliance Requirement
               <select id="complianceReq">
                 <option>FedRAMP Required</option>
@@ -52,7 +52,6 @@
                 <option>None specified</option>
               </select>
             </label>
-
             <label>Readiness
               <select id="readiness">
                 <option>Complete</option>
@@ -63,7 +62,6 @@
                 <option>Expired</option>
               </select>
             </label>
-
             <label>Business Value (15)
               <input type="number" id="bizValue" min="1" max="5" value="3"/>
             </label>
@@ -82,7 +80,7 @@
         </section>
 
         <section id="tab-batch" class="tabpane">
-          <p class="muted">Upload a CSV containing: <code>name,agency,compliance,readiness,b,o,l</code></p>
+          <p class="muted">Upload CSV with columns: <code>name,agency,compliance,readiness,b,o,l</code></p>
           <div class="upload">
             <input type="file" id="fileUpload" accept=".csv"/>
             <div class="upload__buttons">
@@ -97,38 +95,18 @@
 
         <section id="tab-settings" class="tabpane">
           <div class="grid">
-            <label>Weight C (Compliance)
-              <input type="number" id="wC" min="0" max="1" step="0.05" value="0.4"/>
-            </label>
-            <label>Weight R (Readiness)
-              <input type="number" id="wR" min="0" max="1" step="0.05" value="0.25"/>
-            </label>
-            <label>Weight B (Business)
-              <input type="number" id="wB" min="0" max="1" step="0.05" value="0.25"/>
-            </label>
-            <label>Weight O (Ops Friction)
-              <input type="number" id="wO" min="0" max="1" step="0.05" value="0.1"/>
-            </label>
-            <label>Weight L (Legal)
-              <input type="number" id="wL" min="0" max="1" step="0.05" value="0.1"/>
-            </label>
+            <label>Weight C (Compliance)<input type="number" id="wC" min="0" max="1" step="0.05" value="0.4"/></label>
+            <label>Weight R (Readiness)<input type="number" id="wR" min="0" max="1" step="0.05" value="0.25"/></label>
+            <label>Weight B (Business)<input type="number" id="wB" min="0" max="1" step="0.05" value="0.25"/></label>
+            <label>Weight O (Ops Friction)<input type="number" id="wO" min="0" max="1" step="0.05" value="0.1"/></label>
+            <label>Weight L (Legal)<input type="number" id="wL" min="0" max="1" step="0.05" value="0.1"/></label>
           </div>
-
           <div class="grid grid--3">
-            <label>Migrate Now 
-              <input type="number" id="tNow" min="0" max="5" step="0.1" value="4.5"/>
-            </label>
-            <label>Migrate Soon 
-              <input type="number" id="tSoon" min="0" max="5" step="0.1" value="3.5"/>
-            </label>
-            <label>Migrate Later 
-              <input type="number" id="tLater" min="0" max="5" step="0.1" value="2.5"/>
-            </label>
+            <label>Migrate Now <input type="number" id="tNow" min="0" max="5" step="0.1" value="4.5"/></label>
+            <label>Migrate Soon <input type="number" id="tSoon" min="0" max="5" step="0.1" value="3.5"/></label>
+            <label>Migrate Later <input type="number" id="tLater" min="0" max="5" step="0.1" value="2.5"/></label>
           </div>
-
-          <div class="form-actions">
-            <button class="btn btn--primary" id="applySettingsBtn">Apply</button>
-          </div>
+          <div class="form-actions"><button class="btn btn--primary" id="applySettingsBtn">Apply</button></div>
         </section>
       </aside>
 
@@ -147,13 +125,10 @@
 
         <div class="card">
           <div class="card__title">Recent RFPs</div>
-          <div class="tablewrap">
-            <table id="rfpTable"></table>
-          </div>
+          <div class="tablewrap"><table id="rfpTable"></table></div>
         </div>
       </section>
     </main>
-
   </div>
   <script src="app.js"></script>
 </body>

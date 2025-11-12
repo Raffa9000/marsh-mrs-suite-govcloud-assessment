@@ -55,9 +55,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("previewBtn").addEventListener("click", previewUpload);
   document.getElementById("confirmUploadBtn").addEventListener("click", confirmUpload);
-
   document.getElementById("helpBtn").addEventListener("click",()=>alert("Add RFPs or import CSV. Adjust weights/thresholds to tune the MRS."));
   document.getElementById("runTestsBtn").addEventListener("click", seedDemoData);
+  document.getElementById("loadMockBtn").addEventListener("click", ()=>seedMockData(48$));
 
   updateDashboard();
 });
@@ -71,13 +71,12 @@ function previewUpload(){
     const headers=rows[0];
     const data=rows.slice(1).filter(r=>r.length===headers.length).map(cols=>Object.fromEntries(headers.map((h,i)=>[h.trim(),(cols[i]??'').trim()])));
     uploadedData=data;
-
     const table=document.getElementById("previewTable");
     table.innerHTML="";
     const thead=document.createElement("thead"); const trh=document.createElement("tr");
-    headers.forEach(h=>{const th=document.createElement("th"); th.textContent=h; trh.appendChild(th);}); thead.appendChild(trh); table.appendChild(thead);
+    headers.forEach(h=>{const th=document.createElement("th"); th.textContent=h; trh.appendChild(th)}); thead.appendChild(trh); table.appendChild(thead);
     const tbody=document.createElement("tbody");
-    uploadedData.slice(0,10).forEach(row=>{ const tr=document.createElement("tr"); headers.forEach(h=>{const td=document.createElement("td"); td.textContent=row[h]||''; tr.appendChild(td);}); tbody.appendChild(tr);});
+    uploadedData.slice(0,10).forEach(row=>{ const tr=document.createElement("tr"); headers.forEach(h=>{const td=document.createElement("td"); td.textContent=row[h]||''; tr.appendChild(td)}); tbody.appendChild(tr);});
     table.appendChild(tbody);
     document.getElementById("uploadPreview").style.display="block";
   };
@@ -100,7 +99,7 @@ function confirmUpload(){
   });
   uploadedData=null; document.getElementById("uploadPreview").style.display="none";
   document.getElementById("fileUpload").value="";
-  updateDashboard(); alert(`Imported ${n} records`);
+  updateDashboard(); alert(Imported  records);
 }
 
 function seedDemoData(){
@@ -112,10 +111,31 @@ function seedDemoData(){
   updateDashboard();
 }
 
+/* === Bulk Mock Data Generator for demos === */
+function seedMockData(n){
+  const agencies=["CMS","HHS","PA","AZ","VA","NV","FL","NY","OH","MI","TX","CA"];
+  const comp = Object.keys(MAPPINGS.compliance);
+  const read = Object.keys(MAPPINGS.readiness);
+  const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+  const pick=arr=>arr[rand(0,arr.length-1)];
+  const items=[];
+  for(let i=0;i<n;i++){
+    const name=${pick(agencies)} Opportunity ;
+    const agency=pick(agencies);
+    const c=MAPPINGS.compliance[pick(comp)];
+    const r=MAPPINGS.readiness[pick(read)];
+    const b=rand(1,5), o=rand(1,5), l=rand(1,5);
+    const mrs=computeMRS(c,r,b,o,l), cls=classify(mrs);
+    items.push({name,agency,c,r,b,o,l,mrs,cls,ts:nowISO()});
+  }
+  rfpRecords = items;
+  updateDashboard();
+}
+
 function updateDashboard(){
   const total=rfpRecords.length;
   document.getElementById("kpiTotal").textContent=total;
-  document.getElementById("kpiUpdated").textContent=total?`Updated ${nowISO()}`:"";
+  document.getElementById("kpiUpdated").textContent=total?Updated :"";
   const avg=total?(rfpRecords.reduce((t,r)=>t+r.mrs,0)/total):0;
   document.getElementById("kpiAvgMRS").textContent=(Math.round(avg*10)/10).toFixed(1);
   document.getElementById("kpiNow").textContent=rfpRecords.filter(r=>r.cls==="Migrate Now").length;
