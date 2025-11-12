@@ -1,111 +1,392 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MGF – Gap Analyzer – NIST 800-53 Control Assessment</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GovCloud Migration Decision App (MRS)</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Header -->
-        <header class="app-header">
-            <div style="display: flex; align-items: center; justify-content: space-between;">
-                <div>
-                    <h1>📋 NIST 800-53 Control Gap Analyzer</h1>
-                    <p>Assess compliance gaps and generate POA&M recommendations</p>
-                </div>
-                <div class="header-stats">
-                    <div class="stat-card">
-                        <div class="stat-label">Controls Mapped</div>
-                        <div class="stat-value" id="controlsCount">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Avg Compliance</div>
-                        <div class="stat-value" id="avgCompliance">0%</div>
-                    </div>
-                </div>
-            </div>
-        </header>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div style="display: flex; align-items: center;">
+        <div class="marsh-logo">M</div>
+        <h1>Marsh Migration Readiness Score (MRS) Dashboard</h1>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn--secondary btn--sm" id="runTestsBtn">Run Tests</button>
+        <button class="btn btn--secondary btn--sm" id="helpBtn">Help</button>
+      </div>
+    </header>
 
-        <!-- Main Content -->
-        <div class="content-wrapper">
-            <!-- Left Sidebar -->
-            <aside class="sidebar">
-                <div class="form-section">
-                    <h3>🏢 Assessment Input</h3>
-                    
-                    <label>Client Name</label>
-                    <input type="text" id="clientName" placeholder="e.g., VA Medical Center" value="VA Medical Center - Phoenix">
-                    
-                    <label>Regulatory Framework</label>
-                    <select id="framework">
-                        <option value="fedramp">FedRAMP (Moderate)</option>
-                        <option value="hipaa">HIPAA</option>
-                        <option value="cis">CIS Benchmarks</option>
-                        <option value="nist-high">NIST 800-53 (High)</option>
-                    </select>
-                    
-                    <label>Assessment Date</label>
-                    <input type="date" id="assessmentDate">
-                    
-                    <label>Assessor Name</label>
-                    <input type="text" id="assessor" placeholder="Your name" value="Security Team">
-                    
-                    <button onclick="analyzeGaps()" class="btn-primary">🔍 Analyze Gaps</button>
-                    <button onclick="exportReport()" class="btn-secondary">📥 Export POA&M</button>
-                </div>
-
-                <div class="form-section">
-                    <h3>📊 Quick Stats</h3>
-                    <div id="quickStats"></div>
-                </div>
-            </aside>
-
-            <!-- Main Panel -->
-            <main class="main-panel">
-                <!-- Control Families Tab -->
-                <section class="section">
-                    <h2>🏛️ NIST Control Families</h2>
-                    
-                    <div class="chart-container">
-                        <canvas id="complianceChart"></canvas>
-                    </div>
-
-                    <div class="controls-grid">
-                        <div id="controlFamilies"></div>
-                    </div>
-                </section>
-
-                <!-- Gap Details -->
-                <section class="section">
-                    <h2>⚠️ High-Priority Gaps</h2>
-                    <div id="gapDetails"></div>
-                </section>
-
-                <!-- POA&M Table -->
-                <section class="section">
-                    <h2>📋 Plan of Action & Milestones (POA&M)</h2>
-                    <table class="poam-table">
-                        <thead>
-                            <tr>
-                                <th>Control ID</th>
-                                <th>Family</th>
-                                <th>Current Status</th>
-                                <th>Gap Description</th>
-                                <th>Target Completion</th>
-                                <th>Responsible</th>
-                                <th>Priority</th>
-                            </tr>
-                        </thead>
-                        <tbody id="poamTable"></tbody>
-                    </table>
-                </section>
-            </main>
+    <div class="main-layout">
+      <!-- Left Pane: Inputs -->
+      <aside class="left-pane">
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="add-single">Add Single RFP</button>
+          <button class="tab-btn" data-tab="upload-batch">Upload Batch</button>
+          <button class="tab-btn" data-tab="weights">Weights &amp; Thresholds</button>
         </div>
-    </div>
 
-    <script src="app.js"></script>
+        <!-- Tab: Add Single RFP -->
+        <div class="tab-content active" id="add-single">
+          <form id="singleRfpForm">
+            <div class="form-group">
+              <label class="form-label">Client Name *</label>
+              <input type="text" class="form-control" name="ClientName" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Sector *</label>
+              <select class="form-control" name="Sector" required>
+                <option value="">Select...</option>
+                <option value="Federal">Federal</option>
+                <option value="State">State</option>
+                <option value="Healthcare">Healthcare</option>
+                <option value="Defense">Defense</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Regulatory Language *</label>
+              <select class="form-control" name="RegulatoryLanguage" required>
+                <option value="">Select...</option>
+                <option value="FedRAMP Required">FedRAMP Required</option>
+                <option value="CMS ARS Required">CMS ARS Required</option>
+                <option value="NIST 800-53 Required">NIST 800-53 Required</option>
+                <option value="StateRAMP">StateRAMP</option>
+                <option value="IL4/IL5">IL4/IL5</option>
+                <option value="Compliance preferred">Compliance preferred</option>
+                <option value="Best practices expected">Best practices expected</option>
+                <option value="None specified">None specified</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">ATO Status *</label>
+              <select class="form-control" name="ATOStatus" required>
+                <option value="">Select...</option>
+                <option value="Complete">Complete</option>
+                <option value="In Progress (>75%)">In Progress (&gt;75%)</option>
+                <option value="In Progress (50-75%)">In Progress (50-75%)</option>
+                <option value="In Progress (<50%)">In Progress (&lt;50%)</option>
+                <option value="None">None</option>
+                <option value="Expired">Expired</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Business Impact *</label>
+              <select class="form-control" name="BusinessImpact" required>
+                <option value="">Select...</option>
+                <option value="Very High">Very High</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Operational Constraints *</label>
+              <select class="form-control" name="OperationalConstraints" required>
+                <option value="">Select...</option>
+                <option value="High">High</option>
+                <option value="Moderate">Moderate</option>
+                <option value="Low">Low</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Legal Flexibility *</label>
+              <select class="form-control" name="LegalFlexibility" required>
+                <option value="">Select...</option>
+                <option value="Yes">Yes</option>
+                <option value="Conditional">Conditional</option>
+                <option value="Negotiable">Negotiable</option>
+                <option value="No">No</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Notes</label>
+              <textarea class="form-control" name="Notes" rows="3"></textarea>
+            </div>
+
+            <div class="form-preview" id="formPreview" style="display: none;">
+              <h4>Score Preview</h4>
+              <div id="previewScores"></div>
+            </div>
+
+            <button type="submit" class="btn btn--primary btn--full-width">Add RFP</button>
+          </form>
+        </div>
+
+        <!-- Tab: Upload Batch -->
+        <div class="tab-content" id="upload-batch">
+          <div class="upload-section">
+            <p>Upload a CSV or JSON file containing multiple RFP records.</p>
+            <button class="btn btn--secondary btn--full-width" id="downloadTemplateBtn">Download Sample Template (CSV)</button>
+            <div class="form-group" style="margin-top: 16px;">
+              <label class="form-label">Upload File</label>
+              <input type="file" class="form-control" id="fileUpload" accept=".csv,.json">
+            </div>
+            <div id="uploadPreview" style="display: none; margin-top: 16px;">
+              <h4>Preview</h4>
+              <div id="uploadPreviewTable"></div>
+              <button class="btn btn--primary btn--full-width" id="confirmUploadBtn" style="margin-top: 16px;">Import Records</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Weights & Thresholds -->
+        <div class="tab-content" id="weights">
+          <h3>MRS Formula Weights</h3>
+          <p style="font-size: 12px; color: var(--color-text-secondary); margin-bottom: 16px;">
+            MRS = (Wc×C) + (Wr×R) + (Wb×B) - (Wo×O) + (Wl×L)
+          </p>
+
+          <div class="slider-group">
+            <label class="form-label">Compliance Necessity (Wc): <span id="wcValue">0.4</span></label>
+            <input type="range" class="slider" id="wcSlider" min="0" max="1" step="0.05" value="0.4">
+          </div>
+
+          <div class="slider-group">
+            <label class="form-label">Readiness (Wr): <span id="wrValue">0.25</span></label>
+            <input type="range" class="slider" id="wrSlider" min="0" max="1" step="0.05" value="0.25">
+          </div>
+
+          <div class="slider-group">
+            <label class="form-label">Business Value (Wb): <span id="wbValue">0.25</span></label>
+            <input type="range" class="slider" id="wbSlider" min="0" max="1" step="0.05" value="0.25">
+          </div>
+
+          <div class="slider-group">
+            <label class="form-label">Operational Friction (Wo): <span id="woValue">0.1</span></label>
+            <input type="range" class="slider" id="woSlider" min="0" max="1" step="0.05" value="0.1">
+          </div>
+
+          <div class="slider-group">
+            <label class="form-label">Legal Flexibility (Wl): <span id="wlValue">0.1</span></label>
+            <input type="range" class="slider" id="wlSlider" min="0" max="1" step="0.05" value="0.1">
+          </div>
+
+          <h3 style="margin-top: 32px;">Classification Thresholds</h3>
+
+          <div class="slider-group">
+            <label class="form-label">Migrate Now (≥): <span id="t1Value">4.5</span></label>
+            <input type="range" class="slider" id="t1Slider" min="3" max="5" step="0.1" value="4.5">
+          </div>
+
+          <div class="slider-group">
+            <label class="form-label">Migrate Soon (≥): <span id="t2Value">3.5</span></label>
+            <input type="range" class="slider" id="t2Slider" min="2" max="4.5" step="0.1" value="3.5">
+          </div>
+
+          <div class="slider-group">
+            <label class="form-label">Migrate Later (≥): <span id="t3Value">2.5</span></label>
+            <input type="range" class="slider" id="t3Slider" min="1" max="3.5" step="0.1" value="2.5">
+          </div>
+
+          <button class="btn btn--secondary btn--full-width" id="resetDefaultsBtn" style="margin-top: 24px;">Reset to Defaults</button>
+        </div>
+      </aside>
+
+      <!-- Right Pane: Results & Dashboard -->
+      <main class="right-pane">
+        <!-- KPI Cards -->
+        <div class="kpi-container">
+          <div class="kpi-card">
+            <div class="kpi-label">Total RFPs</div>
+            <div class="kpi-value" id="kpiTotal">0</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Distribution</div>
+            <div class="kpi-value-small" id="kpiDistribution">—</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Avg MRS</div>
+            <div class="kpi-value" id="kpiAvgMRS">—</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Conditional Award</div>
+            <div class="kpi-value" id="kpiConditional">0</div>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-container">
+          <div class="chart-card">
+            <h3>Classification Distribution</h3>
+            <div class="chart-wrapper">
+              <canvas id="donutChart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <h3>Readiness vs Business Value</h3>
+            <div class="chart-wrapper">
+              <canvas id="scatterChart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card chart-card--wide">
+            <h3>Average Domain Scores</h3>
+            <div class="chart-wrapper">
+              <canvas id="barChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results Table -->
+        <div class="results-section">
+          <div class="results-header">
+            <h3>Results</h3>
+            <div class="export-buttons">
+              <button class="btn btn--sm btn--secondary" id="exportJsonBtn">Export JSON</button>
+              <button class="btn btn--sm btn--secondary" id="exportCsvBtn">Export CSV</button>
+              <button class="btn btn--sm btn--secondary" id="exportSummaryBtn">Export Summary</button>
+            </div>
+          </div>
+          <div class="table-container">
+            <table class="results-table" id="resultsTable">
+              <thead>
+                <tr>
+                  <th data-sort="ClientName">Client Name</th>
+                  <th data-sort="Sector">Sector</th>
+                  <th data-sort="MRS">MRS</th>
+                  <th data-sort="Classification">Classification</th>
+                  <th data-sort="C">C</th>
+                  <th data-sort="R">R</th>
+                  <th data-sort="B">B</th>
+                  <th data-sort="O">O</th>
+                  <th data-sort="L">L</th>
+                  <th data-sort="ConditionalAward">Cond. Award</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="resultsTableBody">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Executive Summary -->
+        <div class="executive-summary" id="executiveSummary">
+          <h3>Executive Portfolio Summary</h3>
+          <div id="executiveSummaryContent"></div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="app-footer">
+          © Open Source | Marsh-inspired branding | Not affiliated with Marsh McLennan | Licensed MIT/Apache 2.0 | v1.0
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Record Detail Drawer -->
+  <div class="drawer" id="recordDrawer">
+    <div class="drawer-content">
+      <div class="drawer-header">
+        <h2 id="drawerTitle">Record Details</h2>
+        <button class="drawer-close" id="drawerCloseBtn">&times;</button>
+      </div>
+      <div class="drawer-body" id="drawerBody">
+        <!-- Content populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Test Results Modal -->
+  <div class="modal" id="testModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Test Results</h2>
+        <button class="modal-close" id="testModalClose">&times;</button>
+      </div>
+      <div class="modal-body" id="testModalBody">
+        <!-- Content populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Help Modal -->
+  <div class="modal" id="helpModal">
+    <div class="modal-content modal-content--large">
+      <div class="modal-header">
+        <h2>Help &amp; Documentation</h2>
+        <button class="modal-close" id="helpModalClose">&times;</button>
+      </div>
+      <div class="modal-body" id="helpModalBody">
+        <h3>MRS Formula</h3>
+        <p><strong>MRS = (0.4×C) + (0.25×R) + (0.25×B) - (0.1×O) + (0.1×L)</strong></p>
+        <p>Each factor scores 0–5. Note that Operational Friction (O) is <strong>subtractive</strong>.</p>
+
+        <h3>Field Mappings</h3>
+        <h4>C (Compliance Necessity)</h4>
+        <ul>
+          <li>FedRAMP Required, CMS ARS Required → 5</li>
+          <li>NIST 800-53 Required, StateRAMP → 4</li>
+          <li>IL4/IL5, Compliance preferred → 3</li>
+          <li>Best practices expected → 2</li>
+          <li>None specified → 1</li>
+        </ul>
+
+        <h4>R (Readiness)</h4>
+        <ul>
+          <li>Complete → 5</li>
+          <li>In Progress (&gt;75%) → 4</li>
+          <li>In Progress (50-75%) → 3</li>
+          <li>In Progress (&lt;50%) → 2</li>
+          <li>None, Expired → 1</li>
+        </ul>
+
+        <h4>B (Business Value)</h4>
+        <ul>
+          <li>Very High → 5</li>
+          <li>High → 4</li>
+          <li>Medium → 3</li>
+          <li>Low → 2</li>
+        </ul>
+
+        <h4>O (Operational Friction) - Subtractive</h4>
+        <ul>
+          <li>High → 5</li>
+          <li>Moderate → 3</li>
+          <li>Low → 1</li>
+        </ul>
+
+        <h4>L (Legal Flexibility)</h4>
+        <ul>
+          <li>Yes → 5</li>
+          <li>Conditional → 4</li>
+          <li>Negotiable → 3</li>
+          <li>No → 1</li>
+        </ul>
+
+        <h3>Classification Thresholds</h3>
+        <ul>
+          <li><strong>Migrate Now</strong> (MRS ≥ 4.5): Ready for immediate migration</li>
+          <li><strong>Migrate Soon</strong> (MRS 3.5–4.4): Near-term action required</li>
+          <li><strong>Migrate Later</strong> (MRS 2.5–3.4): Planning phase</li>
+          <li><strong>Hold</strong> (MRS &lt; 2.5): Not ready, defer migration</li>
+        </ul>
+
+        <h3>Conditional Award</h3>
+        <p>Records are flagged as <strong>Conditional Award Candidates</strong> when:</p>
+        <ul>
+          <li>Legal Flexibility (L) ≥ 4, AND</li>
+          <li>Readiness (R) ≤ 3</li>
+        </ul>
+        <p>These RFPs can proceed with interim authorization while full ATO is completed.</p>
+
+        <h3>Data Upload Format</h3>
+        <p>CSV or JSON files must include these fields:</p>
+        <code style="display: block; white-space: pre-wrap; margin: 8px 0;">ClientName, Sector, RegulatoryLanguage, ATOStatus, BusinessImpact, OperationalConstraints, LegalFlexibility, Notes</code>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
 </body>
 </html>
